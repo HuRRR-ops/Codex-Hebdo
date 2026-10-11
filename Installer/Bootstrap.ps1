@@ -98,12 +98,20 @@ try {
         foreach($directory in @('Compiler','UI')) { Copy-Item -LiteralPath (Join-Path $unpack $directory) -Destination $pending -Recurse }
         Copy-Item -LiteralPath $engine.FullName -Destination (Join-Path $pending 'Engine\1.7.3') -Recurse
         foreach($file in @('windhawk.exe','windhawk-x64-helper.exe','command-line.txt')) { Copy-Item -LiteralPath (Join-Path $unpack $file) -Destination $pending }
-        "[Storage]`r`nPortable=1`r`nEnginePath=Engine\1.7.3`r`nUIPath=UI`r`nCompilerPath=Compiler`r`nAppDataPath=AppData" | Set-Content (Join-Path $pending 'windhawk.ini') -Encoding utf8
-        "[Storage]`r`nPortable=1`r`nAppDataPath=..\..\AppData\Engine" | Set-Content (Join-Path $pending 'Engine\1.7.3\engine.ini') -Encoding utf8
+        "[Storage]`r`nPortable=1`r`nEnginePath=Engine\1.7.3`r`nUIPath=UI`r`nCompilerPath=Compiler`r`nAppDataPath=AppData" | Set-Content (Join-Path $pending 'windhawk.ini') -Encoding Unicode
+        "[Storage]`r`nPortable=1`r`nAppDataPath=..\..\AppData\Engine" | Set-Content (Join-Path $pending 'Engine\1.7.3\engine.ini') -Encoding Unicode
         New-Item -ItemType Directory -Force (Split-Path $windhawk -Parent) | Out-Null
         if(Test-Path -LiteralPath $windhawk) { throw 'Windhawk destination already exists; refusing to overwrite it.' }
         Move-Item -LiteralPath $pending -Destination $windhawk
         Remove-Extraction $unpack
+    }
+    # Win32 profile APIs require UTF-16 for Unicode INI files. Repair earlier UTF-8 BOM files.
+    foreach($relative in @('windhawk.ini','Engine\1.7.3\engine.ini')) {
+        $config=Join-Path $windhawk $relative
+        $bytes=[IO.File]::ReadAllBytes($config)
+        if($bytes.Length -ge 3 -and $bytes[0] -eq 239 -and $bytes[1] -eq 187 -and $bytes[2] -eq 191) {
+            [IO.File]::WriteAllText($config,[IO.File]::ReadAllText($config),[Text.Encoding]::Unicode)
+        }
     }
     Say 'Vérification de Codex…' 'Checking Codex…'
     $codex=$null
@@ -154,7 +162,7 @@ try {
     $uninstall='HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\CodexHebdo'
     New-Item -Path $uninstall -Force | Out-Null
     $shell=Join-Path $env:WINDIR 'System32\WindowsPowerShell\v1.0\powershell.exe'
-    $values=@{ DisplayName='Codex Hebdo';DisplayVersion='1.2.0';Publisher='Codex Hebdo';InstallLocation=$destination;DisplayIcon=(Join-Path $destination 'CodexHebdo.exe');UninstallString=('"'+$shell+'" -NoProfile -ExecutionPolicy Bypass -File "'+(Join-Path $destination 'Uninstall.ps1')+'"') }
+    $values=@{ DisplayName='Codex Hebdo';DisplayVersion='1.2.1';Publisher='Codex Hebdo';InstallLocation=$destination;DisplayIcon=(Join-Path $destination 'CodexHebdo.exe');UninstallString=('"'+$shell+'" -NoProfile -ExecutionPolicy Bypass -File "'+(Join-Path $destination 'Uninstall.ps1')+'"') }
     foreach($name in $values.Keys) { New-ItemProperty -Path $uninstall -Name $name -Value $values[$name] -PropertyType String -Force | Out-Null }
     Say 'Codex Hebdo est installé. Les préférences existantes sont conservées.' 'Codex Hebdo is installed. Existing preferences were preserved.'
     exit 0

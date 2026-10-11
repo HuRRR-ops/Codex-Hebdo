@@ -25,7 +25,7 @@ if ($installation.Portable -and $installation.NativeInstalled) {
     $mod = Join-Path $data 'Engine\Mods\codex-hebdo-taskbar.ini'
     if (Test-Path -LiteralPath $mod) {
         $settings = (Get-Content -LiteralPath $mod -Raw) -replace '(?m)^Disabled=0','Disabled=1'
-        Set-Content -LiteralPath $mod -Value $settings -Encoding utf8
+        Set-Content -LiteralPath $mod -Value $settings -Encoding Unicode
         # Windhawk watches this directory and removes the native slot on disabling.
         Start-Sleep -Seconds 3
         Remove-Item -LiteralPath $mod

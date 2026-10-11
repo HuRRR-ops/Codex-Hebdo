@@ -5,8 +5,9 @@
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <ApplicationIcon>../Assets/calendar-mint.ico</ApplicationIcon>
     <AssemblyName>CodexHebdo-Setup</AssemblyName>
-    <Version>1.2.0</Version>
+    <Version>1.2.1</Version>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <SelfContained>true</SelfContained>
     <PublishSingleFile>true</PublishSingleFile>
@@ -16,6 +17,7 @@
   </PropertyGroup>
   <ItemGroup>
     <EmbeddedResource Include="../dist/setup-payload.zip" LogicalName="payload.zip" />
+    <EmbeddedResource Include="../Assets/calendar-mint.ico" LogicalName="logo.ico" />
     <EmbeddedResource Include="../Assets/calendar-mint.png" LogicalName="logo.png" />
   </ItemGroup>
 </Project>

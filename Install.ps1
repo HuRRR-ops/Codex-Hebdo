@@ -63,8 +63,8 @@ LoggingEnabled=0
 DebugLoggingEnabled=0
 Include=explorer.exe
 Architecture=amd64
-Version=1.2.0
-"@ | Set-Content -LiteralPath (Join-Path $mods 'codex-hebdo-taskbar.ini') -Encoding utf8
+Version=1.2.1
+"@ | Set-Content -LiteralPath (Join-Path $mods 'codex-hebdo-taskbar.ini') -Encoding Unicode
     New-Item -ItemType Directory -Force (Join-Path $appData 'ModsSource') | Out-Null
     Copy-Item (Join-Path $PSScriptRoot 'dist\codex-hebdo-taskbar.wh.cpp') (Join-Path $appData 'ModsSource\codex-hebdo-taskbar.wh.cpp') -Force
     $nativeInstalled = $true

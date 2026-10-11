@@ -49,7 +49,7 @@ très chargées et un redémarrage complet d’Explorer restent à valider. Le w
 de structures privées Windows et vise la barre horizontale principale de Windows 11 x64.
 
 
-## Installateur 1.2.0
+## Installateur 1.2.1
 
 - 141 tests applicatifs et 8 tests dédiés au téléchargement, au cache, à l’intégrité, aux codes de sortie et aux délais des processus.
 - Construction autonome Windows x64 et vérification SHA-256 de tous les fichiers du paquet intégré.

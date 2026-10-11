@@ -46,7 +46,7 @@ Source: https://github.com/wieslawsoltes/Svg.Skia
 Source: https://github.com/mono/SkiaSharp
 Source: https://github.com/svg-net/SVG
 
-Installer 1.2.0 redistribution:
+Installer 1.2.1 redistribution:
 The self-contained installer and application include the .NET 10 runtime
 (MIT). Runtime and Windows Desktop license notices are included in licenses/.
 

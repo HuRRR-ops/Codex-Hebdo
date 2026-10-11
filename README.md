@@ -77,7 +77,7 @@ Ces couleurs sont personnalisables. Le compteur de réinitialisations est inform
 
 ### Un seul fichier à lancer
 
-**[Télécharger Codex Hebdo 1.2.0 - Setup.exe](https://github.com/HuRRR-ops/Codex-Hebdo/releases/download/v1.2.0/CodexHebdo-1.2.0-Setup.exe)**
+**[Télécharger Codex Hebdo 1.2.1 - Setup.exe](https://github.com/HuRRR-ops/Codex-Hebdo/releases/download/v1.2.1/CodexHebdo-1.2.1-Setup.exe)**
 
 Lancez le fichier, puis cliquez sur **Installer**. L’assistant est disponible en français et en anglais.
 
@@ -91,7 +91,7 @@ Une connexion Internet et environ **3 Go d’espace libre** sont nécessaires pe
 
 L’assistant réutilise Windhawk portable 1.7.3. Une installation **standard** de Windhawk existante n’est pas remplacée automatiquement : utilisez alors le [guide technique](docs/TECHNICAL.md). L’application vise Windows 11 **x64**, pas ARM64.
 
-[Notes de version et empreinte SHA-256](https://github.com/HuRRR-ops/Codex-Hebdo/releases/tag/v1.2.0)
+[Notes de version et empreinte SHA-256](https://github.com/HuRRR-ops/Codex-Hebdo/releases/tag/v1.2.1)
 
 <details>
 <summary><strong>Compiler et installer depuis les sources</strong></summary>
@@ -149,6 +149,6 @@ L’intégration cible la barre horizontale principale de Windows 11 et dépend 
 
 Select **Général → Langue / Language → English** to switch the interface, widget and tooltips to English. Changes preview live; **Apply** saves them and **Cancel / Close** restores your saved settings.
 
-Download **[CodexHebdo-1.2.0-Setup.exe](https://github.com/HuRRR-ops/Codex-Hebdo/releases/download/v1.2.0/CodexHebdo-1.2.0-Setup.exe)** and click **Install**. The .NET runtime is included; missing portable Windhawk and Codex CLI dependencies are installed automatically. If required, finish signing in through the browser opened by Codex.
+Download **[CodexHebdo-1.2.1-Setup.exe](https://github.com/HuRRR-ops/Codex-Hebdo/releases/download/v1.2.1/CodexHebdo-1.2.1-Setup.exe)** and click **Install**. The .NET runtime is included; missing portable Windhawk and Codex CLI dependencies are installed automatically. If required, finish signing in through the browser opened by Codex.
 
 Requires Windows 11 x64, Internet access and approximately 3 GB of free space during setup. Existing preferences are preserved. An existing standard Windhawk installation is not replaced automatically; use the technical guide in that case. The reset counter is informational and never spends reset credits.

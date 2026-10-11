@@ -25,7 +25,7 @@ internal static class Program
     }
     internal static string Extract()
     {
-        string root=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"CodexHebdo-Setup","1.2.0",Guid.NewGuid().ToString("N"));
+        string root=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"CodexHebdo-Setup","1.2.1",Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(root);
         using var stream=Assembly.GetExecutingAssembly().GetManifestResourceStream("payload.zip")!;
         using var archive=new ZipArchive(stream,ZipArchiveMode.Read);
@@ -60,7 +60,7 @@ internal static class Program
             }
             report(line);
         }
-        Record("Codex Hebdo 1.2.0 - "+DateTimeOffset.Now.ToString("O"));
+        Record("Codex Hebdo 1.2.1 - "+DateTimeOffset.Now.ToString("O"));
         process.OutputDataReceived+=(_,e) => { if(e.Data is { } line) Record(line); };
         process.ErrorDataReceived+=(_,e) => { if(e.Data is { } line) Record(line); };
         process.Start();process.BeginOutputReadLine();process.BeginErrorReadLine();
@@ -76,7 +76,7 @@ internal static class Program
     }
     private static void Clean(string root)
     {
-        string expected=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"CodexHebdo-Setup","1.2.0");
+        string expected=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"CodexHebdo-Setup","1.2.1");
         var folder=new DirectoryInfo(Path.GetFullPath(root));
         if(!string.Equals(folder.Parent?.FullName,expected,StringComparison.OrdinalIgnoreCase) || !Guid.TryParseExact(folder.Name,"N",out _) || folder.LinkTarget is not null) return;
         try { folder.Delete(true); } catch(IOException) { } catch(UnauthorizedAccessException) { }
@@ -96,6 +96,9 @@ internal sealed class SetupForm : Form
     private bool French=>language.SelectedIndex==0;
     internal SetupForm()
     {
+        AutoScaleDimensions=new SizeF(96,96);AutoScaleMode=AutoScaleMode.Dpi;
+        using var iconStream=Assembly.GetExecutingAssembly().GetManifestResourceStream("logo.ico")!;
+        Icon=new Icon(iconStream);
         Text="Codex Hebdo - Installation";Font=new Font("Segoe UI",10);ClientSize=new Size(570,400);
         FormBorderStyle=FormBorderStyle.FixedDialog;MaximizeBox=false;StartPosition=FormStartPosition.CenterScreen;
         BackColor=Color.FromArgb(244,250,250);Padding=new Padding(22);
@@ -104,9 +107,14 @@ internal sealed class SetupForm : Form
         using var logo=Image.FromStream(resource);
         var picture=new PictureBox { Image=new Bitmap(logo),SizeMode=PictureBoxSizeMode.Zoom,Size=new Size(45,48),Margin=new Padding(0,0,15,0) };
         header.Controls.Add(picture);header.Controls.Add(new Label { Text="Codex Hebdo",AutoSize=true,Font=new Font("Segoe UI",20,FontStyle.Bold) });
-        var footer=new FlowLayoutPanel { Dock=DockStyle.Bottom,Height=53,FlowDirection=FlowDirection.RightToLeft,Padding=new Padding(0,10,0,0) };
+        var footer=new TableLayoutPanel { Dock=DockStyle.Bottom,AutoSize=true,AutoSizeMode=AutoSizeMode.GrowAndShrink,ColumnCount=4,RowCount=1,Padding=new Padding(0,12,0,0),Margin=Padding.Empty };
+        footer.ColumnStyles.Add(new ColumnStyle(SizeType.Percent,100));
+        for(int i=0;i<3;i++) footer.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+        footer.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        foreach(Control control in new Control[]{language,cancel,install}) { control.Anchor=AnchorStyles.None;control.Margin=new Padding(8,0,0,0); }
+        install.AutoSizeMode=cancel.AutoSizeMode=AutoSizeMode.GrowAndShrink;
         language.Items.AddRange(["Français","English"]);language.SelectedIndex=CultureInfo.CurrentUICulture.TwoLetterISOLanguageName=="fr"?0:1;
-        footer.Controls.Add(install);footer.Controls.Add(cancel);footer.Controls.Add(language);
+        footer.Controls.Add(language,1,0);footer.Controls.Add(cancel,2,0);footer.Controls.Add(install,3,0);
         Controls.Add(log);Controls.Add(description);Controls.Add(header);Controls.Add(progress);Controls.Add(footer);
         language.SelectedIndexChanged+=(_,_) => Translate();Translate();
         install.Click+=async (_,_) => {

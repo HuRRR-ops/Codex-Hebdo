@@ -47,9 +47,9 @@ $manifest | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $stage 'manifes
 Compress-Archive -Path (Join-Path $stage '*') -DestinationPath (Join-Path $dist 'setup-payload.zip') -Force
 dotnet publish (Join-Path $root 'Installer') -c Release -o (Join-Path $dist 'Setup')
 if($LASTEXITCODE -ne 0) { throw 'Installer publish failed.' }
-$exe=Join-Path $dist 'CodexHebdo-1.2.0-Setup.exe'
+$exe=Join-Path $dist 'CodexHebdo-1.2.1-Setup.exe'
 Copy-Item -LiteralPath (Join-Path $dist 'Setup\CodexHebdo-Setup.exe') -Destination $exe -Force
 $check=Start-Process -FilePath $exe -ArgumentList '--verify' -WindowStyle Hidden -Wait -PassThru
 if($check.ExitCode -ne 0) { throw 'Embedded payload verification failed.' }
-"$((Get-FileHash -LiteralPath $exe -Algorithm SHA256).Hash.ToLowerInvariant())  $([IO.Path]::GetFileName($exe))" | Set-Content -LiteralPath (Join-Path $dist 'SHA256SUMS-1.2.0.txt') -Encoding ascii
+"$((Get-FileHash -LiteralPath $exe -Algorithm SHA256).Hash.ToLowerInvariant())  $([IO.Path]::GetFileName($exe))" | Set-Content -LiteralPath (Join-Path $dist 'SHA256SUMS-1.2.1.txt') -Encoding ascii
 Write-Output $exe
