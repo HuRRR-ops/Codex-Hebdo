@@ -1,6 +1,6 @@
 # Validation - Codex Hebdo 1.1.1
 
-82 tests automatisés réussis sous Windows 11 x64, .NET 10 et Windhawk 1.7.3.
+102 tests automatisés réussis sous Windows 11 x64, .NET 10 et Windhawk 1.7.3.
 
 ## Couverture
 
@@ -18,6 +18,9 @@
   groupes. Rendus français/anglais inspectés à 125 %.
 - Transport du double-clic : la commande U renvoie les mêmes statistiques et réglages
   que V, avant et après l’ouverture des options.
+
+- Réinitialisation : conservation des contrôles, des dimensions, de l’onglet et de
+  la langue ; remise des valeurs par défaut et mise à jour de l’aperçu.
 
 ## Vérifications d’intégration
 

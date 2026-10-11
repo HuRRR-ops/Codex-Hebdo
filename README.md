@@ -49,7 +49,7 @@ Sources : `Companion/` (C#), `Windhawk/` (C++), `Assets/lolo.svg` (logo fourni),
 
 `scripts\Test-Ipc.ps1` contrôle les échanges locaux ; `-Command R` demande une actualisation. Le protocole est un pipe Windows limité à l’utilisateur courant et à sa session. Explorer utilise des opérations overlapped sur un thread de travail ; son thread XAML ne reçoit que des valeurs en mémoire. Le code ne lit aucun fichier d’authentification et ne conserve aucun message brut du serveur. Un Job Object ferme le serveur enfant si le compagnon se termine.
 
-**Validation réalisée :** compilation C++/.NET, 82 tests, lecture du compte réel, notifications JSON-RPC simulées, IPC réel, actualisation manuelle, invalidation à l’arrêt, arrêt du processus enfant, désinstallation/réinstallation, chargement dans Explorer et insertion XAML. Voir `TESTS.md`.
+**Validation réalisée :** compilation C++/.NET, 102 tests, lecture du compte réel, notifications JSON-RPC simulées, IPC réel, actualisation manuelle, invalidation à l’arrêt, arrêt du processus enfant, désinstallation/réinstallation, chargement dans Explorer et insertion XAML. Voir `TESTS.md`.
 
 **Reste à confirmer visuellement :** rendu, infobulle et clic physique ; le service de capture Windows de cette session était indisponible. Les changements effectifs de DPI/résolution, la saturation par de nombreuses applications et le redémarrage complet d’Explorer n’ont pas été testés. L’intégration est prévue pour la barre horizontale principale ; elle dépend de structures privées Windows.
 

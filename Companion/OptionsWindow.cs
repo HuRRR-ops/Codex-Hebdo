@@ -31,6 +31,7 @@ internal sealed class OptionsForm : Form
     private readonly Label details = new() { AutoSize = true, MaximumSize = new Size(560,0), Padding = new Padding(12), Font = new Font("Segoe UI",11) };
     private readonly System.Windows.Forms.Timer timer = new() { Interval = 2000 };
     private bool rebuilding;
+    private readonly List<Action> bindings = [];
     private bool fitting;
     private readonly TableLayoutPanel layout = new() { Dock = DockStyle.Fill, RowCount = 3, ColumnCount = 1 };
     private readonly FlowLayoutPanel buttons = new() { AutoSize = true, Dock = DockStyle.Fill, FlowDirection = FlowDirection.RightToLeft, WrapContents = false };
@@ -58,7 +59,7 @@ internal sealed class OptionsForm : Form
         buttons.Controls.Add(Button("Fermer",() => Close()));
         buttons.Controls.Add(Button("Appliquer",Apply));
         buttons.Controls.Add(Button("Annuler",() => { draft = PreferenceStore.Saved; PreferenceStore.Preview(draft); Close(); }));
-        buttons.Controls.Add(Button("Par défaut",() => { draft = new() { Language=draft.Language }; Rebuild(); Preview(); }));
+        buttons.Controls.Add(Button("Par défaut",() => { draft = new() { Language=draft.Language }; RefreshControls(); Preview(); }));
         layout.Controls.Add(buttons,0,2); Controls.Add(layout);
         FormClosed += (_,_) => { timer.Dispose(); PreferenceStore.Preview(PreferenceStore.Saved); };
         tabs.SelectedIndexChanged += (_,_) => { if (!rebuilding) FitContent(); };
@@ -77,16 +78,18 @@ internal sealed class OptionsForm : Form
         tab.Controls.Add(flow); tabs.TabPages.Add(tab); return flow;
     }
     private void Preview() { if (!rebuilding) PreferenceStore.Preview(draft); }
-    private CheckBox Check(string title, bool value, Action<bool> change)
+    private CheckBox Check(string title, Func<bool> get, Action<bool> change)
     {
-        var b = new CheckBox { Text = title, Checked = value, AutoSize = true, Margin = new Padding(D(4),D(8),D(4),D(8)) };
-        b.CheckedChanged += (_,_) => { change(b.Checked); Preview(); }; return b;
+        var b = new CheckBox { Text = title, Checked = get(), AutoSize = true, Margin = new Padding(D(4),D(8),D(4),D(8)) };
+        bindings.Add(() => b.Checked = get());
+        b.CheckedChanged += (_,_) => { if (!rebuilding) { change(b.Checked); Preview(); } }; return b;
     }
-    private Control Number(string title, int value, int min, int max, Action<int> change, int labelWidth = 300)
+    private Control Number(string title, Func<int> get, int min, int max, Action<int> change, int labelWidth = 300)
     {
         var row = new FlowLayoutPanel { AutoSize = true, WrapContents = false, Margin = new Padding(D(4),D(6),D(4),D(6)) };
         row.Controls.Add(new Label { Text = title, Width = D(labelWidth), AutoSize = false, Height = D(28), TextAlign = ContentAlignment.MiddleLeft });
-        var n = new SizeInput { Minimum = min, Maximum = max, Value = value, Width = D(75) };
+        var n = new SizeInput { Minimum = min, Maximum = max, Value = get(), Width = D(75) };
+        bindings.Add(() => n.Value = get());
         n.ValueChanged += (_,_) => { if (!rebuilding) { change((int)n.Value); Preview(); } };
         // Commit a complete valid typed value immediately, not only after focus leaves the field.
         n.TextChanged += (_,_) => {
@@ -95,15 +98,19 @@ internal sealed class OptionsForm : Form
         };
         row.Controls.Add(n); return row;
     }
-    private Control ColorButton(string title, int value, Action<int> change)
+    private Control ColorButton(string title, Func<int> get, Action<int> change)
     {
-        var b = Button(title,() => { }); b.Width = D(200); b.BackColor = Color.FromArgb(unchecked((int)0xff000000) | value);
+        var b = Button(title,() => { }); b.Width = D(200); b.BackColor = Color.FromArgb(unchecked((int)0xff000000) | get());
         b.ForeColor = b.BackColor.GetBrightness() < .5 ? Color.White : Color.Black;
+        bindings.Add(() => {
+            b.BackColor = Color.FromArgb(unchecked((int)0xff000000) | get());
+            b.ForeColor = b.BackColor.GetBrightness() < .5 ? Color.White : Color.Black;
+        });
         b.Click += (_,_) => {
             using var dialog = new ColorDialog { Color = b.BackColor, FullOpen = true };
             if (dialog.ShowDialog(this) != DialogResult.OK) return;
             b.BackColor = dialog.Color; b.ForeColor = dialog.Color.GetBrightness()<.5?Color.White:Color.Black;
-            change(dialog.Color.ToArgb() & 0xffffff); Preview(); Rebuild();
+            change(dialog.Color.ToArgb() & 0xffffff); Preview(); RefreshControls();
         };
         return b;
     }
@@ -113,20 +120,20 @@ internal sealed class OptionsForm : Form
         var flow = new FlowLayoutPanel { Location = new Point(D(12),D(24)), AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink, FlowDirection = FlowDirection.TopDown, WrapContents = false };
         box.Controls.Add(flow);
         var checks = new FlowLayoutPanel { AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink, WrapContents = false, Margin = Padding.Empty };
-        checks.Controls.Add(Check("Afficher",get().Visible,v => set(get() with { Visible=v })));
-        checks.Controls.Add(Check("Gras",get().Bold,v => set(get() with { Bold=v })));
-        checks.Controls.Add(Check("Italique",get().Italic,v => set(get() with { Italic=v })));
-        checks.Controls.Add(Check("Couleur automatique",get().AutoColor,v => set(get() with { AutoColor=v })));
+        checks.Controls.Add(Check("Afficher",() => get().Visible,v => set(get() with { Visible=v })));
+        checks.Controls.Add(Check("Gras",() => get().Bold,v => set(get() with { Bold=v })));
+        checks.Controls.Add(Check("Italique",() => get().Italic,v => set(get() with { Italic=v })));
+        checks.Controls.Add(Check("Couleur automatique",() => get().AutoColor,v => set(get() with { AutoColor=v })));
         flow.Controls.Add(checks);
         var appearance = new FlowLayoutPanel { AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink, WrapContents = false, Margin = Padding.Empty };
-        appearance.Controls.Add(Number("Taille du texte (DIP)",get().Size,8,20,v => set(get() with { Size=v }),150));
-        appearance.Controls.Add(ColorButton("Couleur personnalisée",get().Color,v => set(get() with { Color=v, AutoColor=false })));
+        appearance.Controls.Add(Number("Taille du texte (DIP)",() => get().Size,8,20,v => set(get() with { Size=v }),150));
+        appearance.Controls.Add(ColorButton("Couleur personnalisée",() => get().Color,v => set(get() with { Color=v, AutoColor=false })));
         flow.Controls.Add(appearance);
         page.Controls.Add(box);
     }
     private void Rebuild()
     {
-        rebuilding = true; int selected = Math.Max(0,tabs.SelectedIndex);
+        rebuilding = true; bindings.Clear(); int selected = Math.Max(0,tabs.SelectedIndex);
         // Preserve the details label while disposing the old pages and their controls.
         details.Parent?.Controls.Remove(details);
         while (tabs.TabPages.Count > 0) { var old = tabs.TabPages[0]; tabs.TabPages.Remove(old); old.Dispose(); }
@@ -135,29 +142,31 @@ internal sealed class OptionsForm : Form
         Style(text,"Pourcentage restant",() => draft.Percent,v => draft=draft with { Percent=v });
         Style(text,"Réinitialisations ↻",() => draft.Credits,v => draft=draft with { Credits=v });
         var logo = Page(tabs,"Logo");
-        logo.Controls.Add(Check("Afficher le logo",draft.LogoVisible,v => draft=draft with { LogoVisible=v }));
-        logo.Controls.Add(Number("Taille du logo (DIP)",draft.LogoSize,12,32,v => draft=draft with { LogoSize=v }));
-        logo.Controls.Add(new Label { Text = draft.LogoPng is null ? "Logo d’origine" : "Logo personnalisé enregistré dans l’application", AutoSize = true });
+        logo.Controls.Add(Check("Afficher le logo",() => draft.LogoVisible,v => draft=draft with { LogoVisible=v }));
+        logo.Controls.Add(Number("Taille du logo (DIP)",() => draft.LogoSize,12,32,v => draft=draft with { LogoSize=v }));
+        var logoInfo = new Label { AutoSize = true };
+        Action updateLogoInfo = () => logoInfo.Text = T(draft.LogoPng is null ? "Logo d’origine" : "Logo personnalisé enregistré dans l’application");
+        bindings.Add(updateLogoInfo); updateLogoInfo(); logo.Controls.Add(logoInfo);
         logo.Controls.Add(Button("Importer un PNG / SVG…",() => {
             using var dialog = new OpenFileDialog { Filter = T("Logo PNG ou SVG|*.png;*.svg"), Title = T("Choisir un logo") };
             if (dialog.ShowDialog(this) != DialogResult.OK) return;
-            try { draft=draft with { LogoPng=LogoImport.Load(dialog.FileName) }; Rebuild(); Preview(); }
+            try { draft=draft with { LogoPng=LogoImport.Load(dialog.FileName) }; RefreshControls(); Preview(); }
             catch (Exception e) when (e is not OutOfMemoryException) { MessageBox.Show(this,T(e.Message),T("Import du logo"),MessageBoxButtons.OK,MessageBoxIcon.Information); }
         }));
-        logo.Controls.Add(Check("Teinter le logo personnalisé (sinon : couleurs d’origine)",draft.TintLogo,v => draft=draft with { TintLogo=v }));
-        logo.Controls.Add(ColorButton("Couleur du logo",draft.LogoColor<0?0x282828:draft.LogoColor,v => draft=draft with { LogoColor=v, TintLogo=true }));
-        logo.Controls.Add(Button("Logo d’origine / thème Windows",() => { draft=draft with { LogoPng=null, LogoColor=-1, TintLogo=false }; Rebuild(); Preview(); }));
+        logo.Controls.Add(Check("Teinter le logo personnalisé (sinon : couleurs d’origine)",() => draft.TintLogo,v => draft=draft with { TintLogo=v }));
+        logo.Controls.Add(ColorButton("Couleur du logo",() => draft.LogoColor<0?0x282828:draft.LogoColor,v => draft=draft with { LogoColor=v, TintLogo=true }));
+        logo.Controls.Add(Button("Logo d’origine / thème Windows",() => { draft=draft with { LogoPng=null, LogoColor=-1, TintLogo=false }; RefreshControls(); Preview(); }));
         var spacing = Page(tabs,"Disposition");
-        spacing.Controls.Add(Number("Espace entre le logo et le texte",draft.LogoGap,0,24,v => draft=draft with { LogoGap=v }));
-        spacing.Controls.Add(Number("Espace entre le % et ↻",draft.CounterGap,0,24,v => draft=draft with { CounterGap=v }));
-        spacing.Controls.Add(Number("Espace entre les deux lignes",draft.LineGap,0,8,v => draft=draft with { LineGap=v }));
-        spacing.Controls.Add(Check("Centrer Hebdo sur le pourcentage seulement",draft.AlignPercent,v => draft=draft with { AlignPercent=v }));
+        spacing.Controls.Add(Number("Espace entre le logo et le texte",() => draft.LogoGap,0,24,v => draft=draft with { LogoGap=v }));
+        spacing.Controls.Add(Number("Espace entre le % et ↻",() => draft.CounterGap,0,24,v => draft=draft with { CounterGap=v }));
+        spacing.Controls.Add(Number("Espace entre les deux lignes",() => draft.LineGap,0,8,v => draft=draft with { LineGap=v }));
+        spacing.Controls.Add(Check("Centrer Hebdo sur le pourcentage seulement",() => draft.AlignPercent,v => draft=draft with { AlignPercent=v }));
         spacing.Controls.Add(new Label { Text = "Par défaut, Hebdo est centré au-dessus de l’ensemble « %  ↻ ».", AutoSize = true });
         var colors = Page(tabs,"Couleurs auto");
         colors.Controls.Add(new Label { Text = "Pourcentage : vert > 50 %, jaune > 20 %, rouge ≤ 20 %.\nRéinitialisations : rouge à 0, vert à partir de 1.\nUne information indisponible reste neutre.", AutoSize = true, Margin = new Padding(D(4),D(8),D(4),D(18)) });
-        colors.Controls.Add(ColorButton("Vert",draft.Good,v => draft=draft with { Good=v }));
-        colors.Controls.Add(ColorButton("Jaune",draft.Warning,v => draft=draft with { Warning=v }));
-        colors.Controls.Add(ColorButton("Rouge",draft.Bad,v => draft=draft with { Bad=v }));
+        colors.Controls.Add(ColorButton("Vert",() => draft.Good,v => draft=draft with { Good=v }));
+        colors.Controls.Add(ColorButton("Jaune",() => draft.Warning,v => draft=draft with { Warning=v }));
+        colors.Controls.Add(ColorButton("Rouge",() => draft.Bad,v => draft=draft with { Bad=v }));
         var general = Page(tabs,"Général");
         general.Controls.Add(new Label { Text = "Langue / Language", AutoSize = true });
         var language = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList, Width = D(240) };
@@ -171,6 +180,18 @@ internal sealed class OptionsForm : Form
         general.Controls.Add(startup);
         general.Controls.Add(new Label { Text = "Ouverture des options : double-clic uniquement.\nUn clic simple ou un clic droit n’ouvre aucun menu.\nLes modifications non appliquées sont annulées à la fermeture.", AutoSize = true, Margin = Pad(12) });
         tabs.SelectedIndex = Math.Min(selected,tabs.TabPages.Count-1); Strings.Translate(this,draft.Language); UpdateDetails(); rebuilding = false; FitContent();
+    }
+    private void RefreshControls()
+    {
+        // Keep the same controls, focus, tab and window bounds during reset.
+        // Only values change; no empty tab tree or intermediate layout is shown.
+        rebuilding = true;
+        SuspendLayout(); layout.SuspendLayout(); tabs.SuspendLayout();
+        try { foreach (var update in bindings) update(); }
+        finally {
+            tabs.ResumeLayout(false); layout.ResumeLayout(false); ResumeLayout(false);
+            rebuilding = false;
+        }
     }
     private void UpdateDetails()
     {

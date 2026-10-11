@@ -157,6 +157,11 @@ internal static class Tests
                     form.DrawToBitmap(image,new Rectangle(Point.Empty,form.Size));
                     if(args.Contains("--render-options")) image.Save(Path.Combine(Path.GetTempPath(),"CodexHebdo-options-"+lang+".png"));
                     var tabs=form.Controls.OfType<TableLayoutPanel>().Single().Controls.OfType<TabControl>().Single();
+                    sizes[1].Value=18;
+                    var resetText=Children(form).OfType<Button>().Single(b => b.Text==Strings.Get("Par défaut",lang));
+                    resetText.PerformClick();
+                    Check(sizes[1].Value==12 && BinaryPrimitives.ReadInt32LittleEndian(PreferenceStore.Packet.AsSpan(24))==12,"defaults update existing inputs and widget preview");
+                    Check(BinaryPrimitives.ReadInt32LittleEndian(PreferenceStore.Packet.AsSpan(104))==(lang=="en"?1:0),"defaults preserve selected language");
                     int fullHeight=form.Height;
                     for(int tab=1;tab<tabs.TabCount;tab++) {
                         tabs.SelectedIndex=tab; form.PerformLayout(); Application.DoEvents();
@@ -164,6 +169,16 @@ internal static class Tests
                         using var tabImage=new Bitmap(form.Width,form.Height);
                         form.DrawToBitmap(tabImage,new Rectangle(Point.Empty,form.Size));
                         if(args.Contains("--render-options")) tabImage.Save(Path.Combine(Path.GetTempPath(),$"CodexHebdo-options-{lang}-{tab}.png"));
+                        var controlsBefore=Children(form).ToArray();
+                        var boundsBefore=form.Bounds;
+                        int resized=0;
+                        EventHandler onResize=(_,_) => resized++;
+                        form.SizeChanged+=onResize;
+                        var reset=Children(form).OfType<Button>().Single(b => b.Text==Strings.Get("Par défaut",lang));
+                        reset.PerformClick(); Application.DoEvents();
+                        form.SizeChanged-=onResize;
+                        Check(controlsBefore.SequenceEqual(Children(form)) && controlsBefore.All(c => !c.IsDisposed),"defaults retain every control without rebuilding tabs");
+                        Check(resized==0 && form.Bounds==boundsBefore && tabs.SelectedIndex==tab,"defaults preserve window bounds and selected tab");
                     }
                 }
             }
