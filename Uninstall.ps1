@@ -40,5 +40,6 @@ if ($installation.Portable -and $installation.NativeInstalled) {
 } else { Write-Host 'Dans Windhawk, supprimer le mod Codex Hebdo Taskbar.' }
 # The target is fixed, checked above, and has our installation marker. Do not follow a junction.
 if ((Get-Item -LiteralPath $destination).Attributes -band [IO.FileAttributes]::ReparsePoint) { throw 'Refus de supprimer une jonction.' }
+Remove-Item -LiteralPath 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\CodexHebdo' -ErrorAction SilentlyContinue
 Remove-Item -LiteralPath $destination -Recurse -Force
 Write-Host 'Codex Hebdo désinstallé. Windhawk et Codex sont conservés.'

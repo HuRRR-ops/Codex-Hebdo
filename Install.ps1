@@ -1,13 +1,13 @@
-param([string]$WindhawkPath, [switch]$NoStart)
+param([string]$WindhawkPath, [string]$CodexPath, [switch]$NoStart)
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 $destination = Join-Path $env:LOCALAPPDATA 'CodexHebdo'
 $source = Join-Path $PSScriptRoot 'dist\Companion'
 if (!(Test-Path (Join-Path $source 'CodexHebdo.exe'))) { throw 'Exécuter Build.ps1 avant installation.' }
-if (!(Get-Command dotnet -ErrorAction SilentlyContinue) -or !(dotnet --list-runtimes | Select-String 'Microsoft.WindowsDesktop.App 10\.')) {
+if (!(Test-Path (Join-Path $source 'hostpolicy.dll')) -and (!(Get-Command dotnet -ErrorAction SilentlyContinue) -or !(dotnet --list-runtimes | Select-String 'Microsoft.WindowsDesktop.App 10\.'))) {
     throw 'Installer le runtime .NET Desktop 10 x64 : https://dotnet.microsoft.com/download/dotnet/10.0'
 }
-$codex = (Get-Command codex.exe -ErrorAction Stop).Source
+$codex = if ($CodexPath) { (Resolve-Path -LiteralPath $CodexPath -ErrorAction Stop).Path } else { (Get-Command codex.exe -ErrorAction Stop).Source }
 if (!$WindhawkPath) {
     $WindhawkPath = @("$env:LOCALAPPDATA\Programs\Windhawk", "${env:ProgramFiles}\Windhawk", "${env:ProgramFiles(x86)}\Windhawk") |
         Where-Object { Test-Path (Join-Path $_ 'windhawk.exe') } | Select-Object -First 1
@@ -16,7 +16,9 @@ if (!$WindhawkPath -or !(Test-Path (Join-Path $WindhawkPath 'windhawk.exe'))) {
     throw 'Windhawk absent. Installer https://windhawk.net puis relancer, ou fournir -WindhawkPath.'
 }
 $WindhawkPath = (Resolve-Path -LiteralPath $WindhawkPath).Path
-& (Join-Path $PSScriptRoot 'scripts\Prepare-Symbols.ps1') -WindhawkPath $WindhawkPath
+if (Test-Path (Join-Path $WindhawkPath 'windhawk.ini')) {
+    & (Join-Path $PSScriptRoot 'scripts\Prepare-Symbols.ps1') -WindhawkPath $WindhawkPath
+}
 $oldExe = Join-Path $destination 'CodexHebdo.exe'
 $run = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run'
 $enableStartup = !(Test-Path (Join-Path $destination 'preferences.json')) -or
@@ -61,7 +63,7 @@ LoggingEnabled=0
 DebugLoggingEnabled=0
 Include=explorer.exe
 Architecture=amd64
-Version=1.1.1
+Version=1.2.0
 "@ | Set-Content -LiteralPath (Join-Path $mods 'codex-hebdo-taskbar.ini') -Encoding utf8
     New-Item -ItemType Directory -Force (Join-Path $appData 'ModsSource') | Out-Null
     Copy-Item (Join-Path $PSScriptRoot 'dist\codex-hebdo-taskbar.wh.cpp') (Join-Path $appData 'ModsSource\codex-hebdo-taskbar.wh.cpp') -Force

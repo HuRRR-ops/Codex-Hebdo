@@ -2,7 +2,7 @@
 // @id              codex-hebdo-taskbar
 // @name            Codex Hebdo
 // @description     Quota hebdomadaire Codex restant, intégré à la disposition native Windows 11.
-// @version         1.1.1
+// @version         1.2.0
 // @author          Codex Hebdo contributors
 // @include         explorer.exe
 // @architecture    amd64

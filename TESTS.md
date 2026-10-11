@@ -47,3 +47,13 @@ Les tests de protocole et les rendus hors écran ne simulent pas le double-clic 
 sur Explorer. Les changements de moniteur/DPI en cours d’utilisation, les configurations
 très chargées et un redémarrage complet d’Explorer restent à valider. Le widget dépend
 de structures privées Windows et vise la barre horizontale principale de Windows 11 x64.
+
+
+## Installateur 1.2.0
+
+- 141 tests applicatifs et 8 tests dédiés au téléchargement, au cache, à l’intégrité, aux codes de sortie et aux délais des processus.
+- Construction autonome Windows x64 et vérification SHA-256 de tous les fichiers du paquet intégré.
+- Préparation réelle sans dépendances dans un dossier isolé, avec téléchargement et extraction de Windhawk 1.7.3 et Codex CLI 0.162.1.
+- Lecture réussie du quota réel avec le Codex téléchargé.
+- Installation par le fichier Setup.exe sur la machine de développement : code de sortie 0, préférences inchangées, autostart conservé, runtime local présent et widget attaché.
+- Une machine Windows vierge, le parcours navigateur d’un nouveau compte et les configurations Windhawk standard ne sont pas couverts par ces essais. Windhawk standard n’est pas migré automatiquement.

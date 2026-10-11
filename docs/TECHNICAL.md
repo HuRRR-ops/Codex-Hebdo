@@ -1,6 +1,30 @@
 # Guide technique
 
-Le dépôt contient les sources et les scripts de compilation/installation. Compiler avec `Build.ps1` avant de lancer `Install.ps1`. L’installateur unique incluant toutes les dépendances reste à préparer.
+La release 1.2.0 fournit un installateur automatique Windows x64. Il inclut .NET, télécharge les dépendances manquantes depuis leurs releases officielles et prépare Windhawk portable. Une connexion au compte reste interactive si nécessaire.
+
+Les instructions ci-dessous concernent la compilation et l’installation manuelles. Compiler avec `Build.ps1` avant de lancer `Install.ps1`.
+
+## Installateur automatique
+
+- Source : `Installer/`, construction : `scripts/Build-Installer.ps1` après `Build.ps1`.
+- Construction avec .NET 10 et 7-Zip installé sur la machine de compilation.
+- Le build récupère 7-Zip 26.04 et ses sources avec vérification SHA-256. Les binaires, licences et sources correspondantes sont inclus dans le paquet.
+- Le runtime .NET est publié en mode autonome. La machine cible n’a besoin ni du SDK, ni d’un runtime installé séparément.
+- Les dépendances téléchargées sont épinglées : Windhawk 1.7.3 et Codex CLI 0.162.1. SHA-256 obligatoire ; signature Authenticode également vérifiée pour Windhawk.
+- Windhawk portable compatible et Codex existants sont réutilisés. Windhawk standard ou une version portable incompatible est préservé et signalé, sans écrasement.
+- Codex installé par l’assistant reste dans `%LOCALAPPDATA%\Programs\CodexHebdo-Codex`. Aucun changement global de PATH.
+- Cache de téléchargement : `%LOCALAPPDATA%\CodexHebdo-Setup\Downloads`. Journal : `%LOCALAPPDATA%\CodexHebdo-Setup\1.2.0\setup.log`. La sortie des commandes de connexion Codex n’est pas enregistrée.
+- Une annulation est possible avant l’application des fichiers du widget. Pendant cette phase finale, l’annulation est désactivée.
+- L’application est ajoutée à la liste des applications installées de Windows. La désinstallation conserve Codex et Windhawk.
+- L’exécutable de l’installateur n’est pas signé par un certificat de signature de code.
+
+### Vérifications de la release 1.2.0
+
+141 tests du compagnon et 8 tests de l’installateur. Préparation réelle de Windhawk et Codex dans un dossier isolé sans dépendances, lecture du quota via le Codex téléchargé, vérification du paquet intégré et mise à jour locale avec conservation des préférences et de l’autostart.
+
+Ces essais ne constituent pas un test sur une machine Windows vierge. Le parcours de connexion d’un nouveau compte et la diversité des configurations Windows restent à valider plus largement.
+
+## Installation manuelle
 
 Installation par utilisateur dans `%LOCALAPPDATA%\CodexHebdo`, avec Windhawk portable dans `%LOCALAPPDATA%\Programs\Windhawk`. Démarrage automatique des deux via les valeurs `CodexHebdo` et `CodexHebdo.Windhawk` de HKCU\Software\Microsoft\Windows\CurrentVersion\Run. Aucun droit administrateur utilisé.
 

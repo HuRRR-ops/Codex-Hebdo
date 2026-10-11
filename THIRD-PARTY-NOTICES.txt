@@ -45,3 +45,20 @@ Settings logo rendering uses Svg.Skia 5.2.3 (MIT), Svg.Custom / SVG.NET
 Source: https://github.com/wieslawsoltes/Svg.Skia
 Source: https://github.com/mono/SkiaSharp
 Source: https://github.com/svg-net/SVG
+
+Installer 1.2.0 redistribution:
+The self-contained installer and application include the .NET 10 runtime
+(MIT). Runtime and Windows Desktop license notices are included in licenses/.
+
+The installer embeds unmodified 7z.exe and 7z.dll from 7-Zip 26.04 to extract
+Windhawk. The upstream license and the complete corresponding source archive
+7z2604-src.tar.xz are included in the installer payload and installed licenses/.
+Source: https://github.com/ip7z/7zip/releases/tag/26.04
+
+Windhawk 1.7.3 and Codex CLI 0.162.1 are downloaded from their official GitHub
+release assets only when needed. They are not embedded in this installer.
+Downloads are pinned and checked against SHA-256; Windhawk is also checked
+with Authenticode before extraction. The original archives remain in the
+per-user setup download cache with their upstream distribution contents.
+Codex source and license: https://github.com/openai/codex/tree/rust-v0.162.1
+Windhawk source and license: https://github.com/ramensoftware/windhawk/tree/v1.7.3

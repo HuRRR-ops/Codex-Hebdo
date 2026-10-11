@@ -20,7 +20,7 @@ if (!$SkipNative) {
     if (!(Test-Path -LiteralPath $compiler)) { throw 'Compilateur absent. Fournir -WindhawkPath ou utiliser -SkipNative.' }
     $options = @('-std=c++23','-O2','-shared','-DUNICODE','-D_UNICODE','-DWINVER=0x0A00','-D_WIN32_WINNT=0x0A00',
         '-D_WIN32_IE=0x0A00','-DNTDDI_VERSION=0x0A000008','-D__USE_MINGW_ANSI_STDIO=0','-DWH_MOD',
-        '-DWH_MOD_ID=L"codex-hebdo-taskbar"','-DWH_MOD_VERSION=L"1.1.1"',
+        '-DWH_MOD_ID=L"codex-hebdo-taskbar"','-DWH_MOD_VERSION=L"1.2.0"',
         (Join-Path $WindhawkPath 'Engine\1.7.3\64\windhawk.lib'),
         '-include','windhawk_api.h','-target','x86_64-w64-mingw32','-Wl,--export-all-symbols',
         '-o',(Join-Path $dist 'codex-hebdo-taskbar.dll'),$native,

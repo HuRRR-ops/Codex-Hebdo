@@ -75,17 +75,26 @@ Ces couleurs sont personnalisables. Le compteur de réinitialisations est inform
 
 ## Installation
 
-### Télécharger la version prête à installer
+### Un seul fichier à lancer
 
-**[Télécharger Codex Hebdo 1.1.1 pour Windows x64](https://github.com/HuRRR-ops/Codex-Hebdo/releases/download/v1.1.1/CodexHebdo-1.1.1-win-x64.zip)**
+**[Télécharger Codex Hebdo 1.2.0 - Setup.exe](https://github.com/HuRRR-ops/Codex-Hebdo/releases/download/v1.2.0/CodexHebdo-1.2.0-Setup.exe)**
 
-Extrayez toute l’archive, puis lancez **Installer.cmd**. Le programme et le mod sont déjà compilés : aucun SDK n’est nécessaire pour cette archive.
+Lancez le fichier, puis cliquez sur **Installer**. L’assistant est disponible en français et en anglais.
 
-Cette première release utilise **Windhawk portable 1.7.3**, **Codex connecté et accessible via `codex.exe`**, et le **runtime .NET Desktop 10 x64**, à installer séparément. Consultez `INSTALLATION.txt` dans l’archive pour les chemins personnalisés.
+- **.NET est inclus** : aucun runtime ou SDK à installer séparément.
+- **Windhawk portable 1.7.3 est préparé automatiquement** s’il manque.
+- **Codex CLI est installé automatiquement** si aucun exécutable compatible n’est trouvé.
+- Si nécessaire, **connectez votre compte dans le navigateur** ouvert par Codex.
+- Le widget, les symboles Windows et le démarrage automatique sont configurés. Vos préférences existantes sont conservées.
 
-[Notes de version et empreinte SHA-256](https://github.com/HuRRR-ops/Codex-Hebdo/releases/tag/v1.1.1)
+Une connexion Internet et environ **3 Go d’espace libre** sont nécessaires pendant l’installation. Les téléchargements des dépendances sont vérifiés par SHA-256 et réutilisés lors d’une nouvelle tentative. Windhawk est également vérifié par sa signature numérique.
 
-> Les dépendances ne sont pas incluses. L’installateur tout-en-un reste à préparer.
+L’assistant réutilise Windhawk portable 1.7.3. Une installation **standard** de Windhawk existante n’est pas remplacée automatiquement : utilisez alors le [guide technique](docs/TECHNICAL.md). L’application vise Windows 11 **x64**, pas ARM64.
+
+[Notes de version et empreinte SHA-256](https://github.com/HuRRR-ops/Codex-Hebdo/releases/tag/v1.2.0)
+
+<details>
+<summary><strong>Compiler et installer depuis les sources</strong></summary>
 
 ### Prérequis
 
@@ -116,6 +125,8 @@ Une fois installé, **double-cliquez sur le widget** pour ouvrir les options. Vo
 
 Pour les chemins d’installation, les symboles Windows et la désinstallation, consultez le [guide technique](docs/TECHNICAL.md).
 
+</details>
+
 ## Des données utiles, des réglages locaux
 
 - Seul le **quota hebdomadaire Codex** est affiché.
@@ -138,4 +149,6 @@ L’intégration cible la barre horizontale principale de Windows 11 et dépend 
 
 Select **Général → Langue / Language → English** to switch the interface, widget and tooltips to English. Changes preview live; **Apply** saves them and **Cancel / Close** restores your saved settings.
 
-Windows 11 x64, a signed-in Codex installation, Windhawk and .NET 10 are required. Download the **prebuilt Windows x64 ZIP** from [Releases](https://github.com/HuRRR-ops/Codex-Hebdo/releases/latest), extract it and run **Installer.cmd**. This package requires portable Windhawk 1.7.3 and .NET Desktop Runtime 10 x64. Dependencies are not bundled; an all-in-one installer is not available yet. The reset counter is informational and never spends reset credits.
+Download **[CodexHebdo-1.2.0-Setup.exe](https://github.com/HuRRR-ops/Codex-Hebdo/releases/download/v1.2.0/CodexHebdo-1.2.0-Setup.exe)** and click **Install**. The .NET runtime is included; missing portable Windhawk and Codex CLI dependencies are installed automatically. If required, finish signing in through the browser opened by Codex.
+
+Requires Windows 11 x64, Internet access and approximately 3 GB of free space during setup. Existing preferences are preserved. An existing standard Windhawk installation is not replaced automatically; use the technical guide in that case. The reset counter is informational and never spends reset credits.

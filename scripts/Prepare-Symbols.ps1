@@ -45,7 +45,7 @@ if (!(Test-Path -LiteralPath $pdb)) {
     New-Item -ItemType Directory -Force $folder | Out-Null
     $temporary = Join-Path $folder ([guid]::NewGuid().ToString('N') + '.download')
     try {
-        Invoke-WebRequest "https://msdl.microsoft.com/download/symbols/Taskbar.pdb/$key/Taskbar.pdb" -OutFile $temporary -TimeoutSec 90
+        Invoke-WebRequest -UseBasicParsing "https://msdl.microsoft.com/download/symbols/Taskbar.pdb/$key/Taskbar.pdb" -OutFile $temporary -TimeoutSec 90
         $stream = [IO.File]::OpenRead($temporary)
         try { $header=[byte[]]::new(24); [void]$stream.Read($header,0,24) } finally { $stream.Dispose() }
         if (![Text.Encoding]::ASCII.GetString($header).StartsWith('Microsoft C/C++ MSF')) { throw 'Fichier PDB inattendu.' }
