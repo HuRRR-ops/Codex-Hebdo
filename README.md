@@ -3,7 +3,11 @@
   <h1>Codex Hebdo</h1>
   <p><strong>Votre quota Codex, toujours à portée de regard.</strong></p>
   <p>Un widget discret dans la barre des tâches de Windows 11.<br>Le pourcentage restant, les réinitialisations disponibles et juste ce qu’il vous faut.</p>
-  <p><strong>Windows 11 x64 · Français / English · 6 thèmes</strong></p>
+  <p>
+    <img src="docs/images/badges/windows.svg" alt="Windows 11 x64" height="26">
+    <img src="docs/images/badges/languages.svg" alt="Interface en français et en anglais" height="26">
+    <img src="docs/images/badges/themes.svg" alt="6 thèmes" height="26">
+  </p>
   <p><a href="#aperçu">Aperçu</a> · <a href="#personnalisation">Personnalisation</a> · <a href="#installation">Installation</a> · <a href="#english">English</a></p>
   <br>
   <img src="docs/images/taskbar.png" width="443" alt="Codex Hebdo dans la barre des tâches : 82 % restants et aucune réinitialisation disponible">

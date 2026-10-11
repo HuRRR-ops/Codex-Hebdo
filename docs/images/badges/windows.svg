@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="130" height="26" viewBox="0 0 130 26" role="img" aria-label="Windows 11 : x64">
+  <title>Windows 11 : x64</title>
+  <defs><clipPath id="rounded"><rect width="130" height="26" rx="6"/></clipPath></defs>
+  <g clip-path="url(#rounded)"><rect width="130" height="26" fill="#253449"/><rect x="91" width="39" height="26" fill="#0078D4"/></g>
+  <g fill="#fff" font-family="Segoe UI,Arial,sans-serif" font-size="12" text-anchor="middle">
+    <text x="45.5" y="17">Windows 11</text><text x="110.5" y="17" font-weight="600">x64</text>
+  </g>
+</svg>

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="94" height="26" viewBox="0 0 94 26" role="img" aria-label="Thèmes : 6">
+  <title>Thèmes : 6</title>
+  <defs><clipPath id="rounded"><rect width="94" height="26" rx="6"/></clipPath></defs>
+  <g clip-path="url(#rounded)"><rect width="94" height="26" fill="#253449"/><rect x="66" width="28" height="26" fill="#7861B5"/></g>
+  <g fill="#fff" font-family="Segoe UI,Arial,sans-serif" font-size="12" text-anchor="middle">
+    <text x="33.0" y="17">Thèmes</text><text x="80.0" y="17" font-weight="600">6</text>
+  </g>
+</svg>

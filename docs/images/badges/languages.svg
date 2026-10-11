@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="138" height="26" viewBox="0 0 138 26" role="img" aria-label="Interface : FR / EN">
+  <title>Interface : FR / EN</title>
+  <defs><clipPath id="rounded"><rect width="138" height="26" rx="6"/></clipPath></defs>
+  <g clip-path="url(#rounded)"><rect width="138" height="26" fill="#253449"/><rect x="72" width="66" height="26" fill="#099B8B"/></g>
+  <g fill="#fff" font-family="Segoe UI,Arial,sans-serif" font-size="12" text-anchor="middle">
+    <text x="36.0" y="17">Interface</text><text x="105.0" y="17" font-weight="600">FR / EN</text>
+  </g>
+</svg>
