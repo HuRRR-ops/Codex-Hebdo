@@ -1,81 +1,131 @@
-# Codex Hebdo
+<div align="center">
+  <img src="Assets/calendar-mint.png" width="88" alt="Logo Codex Hebdo">
+  <h1>Codex Hebdo</h1>
+  <p><strong>Votre quota Codex, toujours à portée de regard.</strong></p>
+  <p>Un widget discret dans la barre des tâches de Windows 11.<br>Le pourcentage restant, les réinitialisations disponibles et juste ce qu’il vous faut.</p>
+  <p>
+    <img src="https://img.shields.io/badge/Windows_11-x64-0078D4?style=flat-square" alt="Windows 11 x64">
+    <img src="https://img.shields.io/badge/Interface-FR_%2F_EN-099B8B?style=flat-square" alt="Interface en français et en anglais">
+    <img src="https://img.shields.io/badge/Thèmes-6-7861B5?style=flat-square" alt="6 thèmes">
+  </p>
+  <p><a href="#aperçu">Aperçu</a> · <a href="#personnalisation">Personnalisation</a> · <a href="#installation">Installation</a> · <a href="#english">English</a></p>
+  <br>
+  <img src="docs/images/taskbar.png" width="443" alt="Codex Hebdo dans la barre des tâches : 82 % restants et aucune réinitialisation disponible">
+  <p><sub>Une vraie place dans la barre des tâches, à côté de vos icônes habituelles.</sub></p>
+</div>
 
-Compteur natif Windows 11 x64 : logo fourni à gauche et **Hebdo au-dessus du pourcentage restant**, avec le nombre de réinitialisations à droite, de la même taille que le pourcentage (`↻0`). Sans délai ni barre. Largeur ajustée automatiquement, police Segoe UI. Vert > 50 %, jaune > 20 %, rouge ≤ 20 %. Le logo suit le thème Windows.
+## Aperçu
 
-Réinitialisations : rouge à zéro, vert dès un, gris (`↻--`) si inconnu ou périmé. La valeur exacte figure aussi dans l’infobulle (affichage compact `99+` au-delà de 99). Le compteur consulte uniquement `rateLimitResetCredits.availableCount` ; aucun clic ne consomme une réinitialisation. Les notifications sans ce champ ne prolongent pas sa fraîcheur, limitée à 75 secondes.
+**Gardez un œil sur votre semaine Codex sans interrompre votre travail.** Codex Hebdo affiche votre quota hebdomadaire restant directement dans la barre des tâches. Un double-clic ouvre les réglages et leur aperçu en direct.
 
-Le mod ajoute un enfant à `SystemTrayFrameGrid`, avant les icônes de notification. Il réserve une colonne Auto dans un Grid, ou une position dans un StackPanel. Aucun overlay, fenêtre de widget ou icône de quota. Windhawk possède sa propre icône de gestion.
+<p align="center">
+  <img src="docs/images/text-settings.png" width="850" alt="Options de Codex Hebdo : personnalisation des textes avec aperçu en direct">
+</p>
 
-## Utilisation
+| L’essentiel | En pratique |
+| :--- | :--- |
+| **Quota hebdomadaire** | Le pourcentage restant, actualisé automatiquement. |
+| **Réinitialisations disponibles** | Un compteur compact : `↻0`, `↻1`, etc. |
+| **Intégration native** | Le widget occupe sa propre place dans la barre des tâches Windows. |
+| **Options au double-clic** | Les clics simples et droits ne déclenchent aucun menu. |
+| **Français et anglais** | Interface, widget, infobulles et détails du quota. |
+| **Démarrage avec Windows** | Activable depuis les réglages. |
 
-- **Double-clic uniquement** : ouvre les options sans effacer les statistiques. La fenêtre ne se redimensionne pas manuellement : elle adapte sa taille à l’ouverture et au DPI, puis conserve ses dimensions pendant les réglages. Clic simple et clic droit : aucun menu. Survol : quota et date/heure locale.
-- Textes indépendants : couleur automatique ou personnalisée, gras, italique, taille et visibilité.
-- Logo PNG/SVG personnalisé, teinte, taille, visibilité et restauration du logo d’origine. L’import conserve les proportions et la transparence ; une copie PNG est intégrée aux préférences.
-- Espacements, centrage du titre et palette des seuils. Les grandes polices sont réduites si nécessaire pour tenir dans la barre des tâches.
-- Interface à navigation latérale, cartes arrondies et aperçu du widget. **Général → Couleurs de l’interface** : Référence, Glacier, Lavande, Rosé, Sable ou Minuit, avec couleur d’accent personnalisée. Les couleurs du widget restent indépendantes.
-- **Général → Langue / Language** : Français ou English, y compris le widget, les infobulles et les détails.
-- Aperçu en direct ; **Appliquer** enregistre, **Annuler/Fermer** restaure la dernière version enregistrée. Préférences locales dans `preferences.json`, conservées lors d’une mise à jour.
-- Général : actualisation manuelle et démarrage avec Windows. Aucun clic ne consomme de réinitialisation.
-- Sans données, en erreur, après expiration ou après 75 secondes sans mesure : **Hebdo / --**.
-- Le compagnon conserve `codex app-server --stdio`, initialise JSON-RPC, écoute les notifications et relit toutes les 30 secondes. En erreur : 30, 60, 120, 240, puis 300 secondes ; le bouton Actualiser peut demander une reprise anticipée.
-- Seule une fenêtre de **10 080 minutes** du bucket Codex est acceptée, qu’elle soit `primary` ou `secondary`. Les réponses ambiguës sont rejetées. Restant = `100 - usedPercent` ; aucun quota Session n’est affiché.
+Les chiffres des captures sont des exemples issus de l’application ; votre widget affiche les données de votre compte.
+
+## Personnalisation
+
+### Petit widget, grands choix
+
+Ajustez indépendamment **Hebdo**, le **pourcentage** et les **réinitialisations** : visibilité, taille, gras, italique et couleur. Modifiez les espacements et choisissez le centrage qui vous convient.
+
+Les changements apparaissent en direct. **Appliquer** enregistre vos choix ; **Annuler** ou **Fermer** restaure les derniers réglages enregistrés.
+
+<table>
+  <tr>
+    <td width="50%"><strong>Votre logo</strong><br>Importez un PNG ou un SVG, ajustez sa taille et choisissez sa teinte.</td>
+    <td width="50%"><strong>Votre disposition</strong><br>Réglez les espacements et l’alignement du titre au-dessus des chiffres.</td>
+  </tr>
+  <tr>
+    <td><img src="docs/images/custom-logo.png" alt="Réglages du logo personnalisé"></td>
+    <td><img src="docs/images/layout.png" alt="Réglages des espacements et du centrage"></td>
+  </tr>
+</table>
+
+### Une interface à vos couleurs
+
+Choisissez parmi **Référence · Glacier · Lavande · Rosé · Sable · Minuit**, puis ajustez la couleur d’accent à votre goût. Les thèmes de la fenêtre et les couleurs du widget se règlent séparément.
+
+<details>
+<summary><strong>Voir les couleurs automatiques du widget</strong></summary>
+
+<p align="center">
+  <img src="docs/images/automatic-colors.png" width="760" alt="Personnalisation des couleurs des seuils de quota">
+</p>
+
+| Indicateur | Couleurs par défaut |
+| :--- | :--- |
+| Quota restant | Vert au-dessus de 50 %, jaune au-dessus de 20 %, rouge à 20 % ou moins. |
+| Réinitialisations | Rouge à zéro, vert dès qu’une réinitialisation est disponible. |
+| Données indisponibles | Affichage neutre `--` ou `↻--`. |
+
+Ces couleurs sont personnalisables. Le compteur de réinitialisations est informatif : **l’application ne consomme aucune réinitialisation**.
+
+</details>
 
 ## Installation
 
-Le dépôt contient les sources et les scripts de compilation/installation. Compiler avec `Build.ps1` avant de lancer `Install.ps1`. L’installateur unique incluant toutes les dépendances reste à préparer.
+> **Distribution actuelle : sources et scripts.** L’installateur unique incluant toutes les dépendances n’est pas encore disponible.
 
-Installation par utilisateur dans `%LOCALAPPDATA%\CodexHebdo`, avec Windhawk portable dans `%LOCALAPPDATA%\Programs\Windhawk`. Démarrage automatique des deux via les valeurs `CodexHebdo` et `CodexHebdo.Windhawk` de HKCU\Software\Microsoft\Windows\CurrentVersion\Run. Aucun droit administrateur utilisé.
+### Prérequis
 
-Après compilation, pour installer depuis ce dossier :
+- **Windows 11 x64**.
+- **Codex installé et connecté** à votre compte.
+- **Windhawk**, avec son compilateur, installé depuis [windhawk.net](https://windhawk.net/).
+- **SDK .NET 10** pour compiler, et **runtime .NET Desktop 10 x64** pour exécuter l’application.
 
-```powershell
-.\Install.ps1
-```
+### Compiler et installer
 
-Dépendances : Windows 11 x64, runtime .NET Desktop 10 x64, Codex déjà connecté, Windhawk 1.7.3 ou compatible. Sur une autre machine, installer Windhawk depuis [windhawk.net](https://windhawk.net/). Si 7-Zip est présent, `scripts\Prepare-Windhawk.ps1` peut préparer la version portable officielle avec vérification de signature. Cette dépendance comprend son éditeur et son compilateur et occupe environ 0,84 Go ; le compteur lui-même est beaucoup plus petit.
-
-Pour une installation **standard** de Windhawk, le script installe le compagnon puis indique l’étape manuelle : Windhawk → **Créer un nouveau mod** → remplacer le code par `dist\codex-hebdo-taskbar.wh.cpp` → **Compiler (F7)** et activer. Pour une installation portable, le script configure aussi le mod automatiquement.
-
-Les symboles de `taskbar.dll` sont préparés par PowerShell avant activation. Le mod désactive explicitement les serveurs de symboles et caches en ligne dans Explorer. Après une mise à jour Windows changeant `taskbar.dll`, relancer `Install.ps1` pour préparer les nouveaux symboles. Une structure privée non reconnue fait refuser l’intégration plutôt que deviner un offset.
-
-## Compilation et tests
-
-SDK .NET 10 et compilateur fourni avec Windhawk :
+Clonez le dépôt, puis ouvrez PowerShell dans son dossier :
 
 ```powershell
-.\Build.ps1 -WindhawkPath "$env:LOCALAPPDATA\Programs\Windhawk"
+git clone https://github.com/HuRRR-ops/Codex-Hebdo.git
+cd Codex-Hebdo
 ```
 
-Sources : `Companion/` (C#), `Windhawk/` (C++), `Assets/lolo.svg` (logo fourni), `Tests/`. Le fichier `.wh.cpp` autonome est assemblé depuis les `.inc` et est aussi livré dans `dist/`, avec la DLL compilée et le compagnon.
-
-`scripts\Test-Ipc.ps1` contrôle les échanges locaux ; `-Command R` demande une actualisation. Le protocole est un pipe Windows limité à l’utilisateur courant et à sa session. Explorer utilise des opérations overlapped sur un thread de travail ; son thread XAML ne reçoit que des valeurs en mémoire. Le code ne lit aucun fichier d’authentification et ne conserve aucun message brut du serveur. Un Job Object ferme le serveur enfant si le compagnon se termine.
-
-**Validation réalisée :** compilation C++/.NET, 141 tests, lecture du compte réel, notifications JSON-RPC simulées, IPC réel, actualisation manuelle, invalidation à l’arrêt, arrêt du processus enfant, désinstallation/réinstallation, chargement dans Explorer et insertion XAML. Voir `TESTS.md`.
-
-**Reste à confirmer visuellement :** rendu, infobulle et clic physique ; le service de capture Windows de cette session était indisponible. Les changements effectifs de DPI/résolution, la saturation par de nombreuses applications et le redémarrage complet d’Explorer n’ont pas été testés. L’intégration est prévue pour la barre horizontale principale ; elle dépend de structures privées Windows.
-
-## Désinstallation
+Indiquez le dossier de votre installation Windhawk :
 
 ```powershell
-.\Uninstall.ps1
+.\Build.ps1 -WindhawkPath "C:\chemin\vers\Windhawk"
+.\Install.ps1 -WindhawkPath "C:\chemin\vers\Windhawk"
 ```
 
-Ou lancer `%LOCALAPPDATA%\CodexHebdo\Uninstall.ps1`. Le script retire le compagnon, son démarrage automatique et le mod portable, en restaurant la place réservée. Pour Windhawk standard, supprimer également le mod dans son interface. Windhawk, ses symboles partagés, Codex et les sources sont conservés. Le dossier de construction et l’archive peuvent ensuite être supprimés indépendamment.
+Avec **Windhawk portable**, le script configure le mod automatiquement. Avec une installation **standard**, suivez les instructions affichées pour importer et compiler le mod dans Windhawk.
 
-## Références étudiées
+Une fois installé, **double-cliquez sur le widget** pour ouvrir les options. Vos préférences sont conservées lors des mises à jour.
 
-- [Documentation officielle App Server](https://learn.chatgpt.com/docs/app-server) : initialisation, limites, notifications.
-- [Taskbar Folder Menus](https://github.com/ramensoftware/windhawk-mods/blob/main/mods/taskbar-folder-menus.wh.cpp) : accès XAML, réservation/restauration d’une place Grid ou StackPanel. Helpers MIT adaptés, voir `THIRD-PARTY-NOTICES.txt`.
-- [rate-tray](https://github.com/nowrap/rate-tray) : transport Codex et gestion des limites ; aucune lecture de jetons reprise.
-- [CodexQuota](https://github.com/JulienMaille/CodexQuota) : comportement et positionnement ; sa fenêtre rattachée à la barre n’est pas utilisée ici.
+Pour les chemins d’installation, les symboles Windows et la désinstallation, consultez le [guide technique](docs/TECHNICAL.md).
 
-## Interface / English
+## Des données utiles, des réglages locaux
 
-Double-click the widget to open settings. Single-click and right-click do not open a menu.
-Choose **General → Language → English** to translate the widget, settings, tooltips and quota details.
-Changes preview live; **Apply** saves them and **Cancel/Close** restores the last saved settings.
-Custom logos accept local PNG and static SVG files, preserving transparency and aspect ratio.
-The application does not use reset credits; the counter is informational.
+- Seul le **quota hebdomadaire Codex** est affiché.
+- Le compagnon reçoit les notifications de `codex app-server` et interroge les limites toutes les **30 secondes**.
+- Une mesure vieille de plus de **75 secondes** n’est plus présentée comme actuelle.
+- Les préférences et les logos importés restent **sur votre ordinateur**.
+- Le code ne lit pas les fichiers d’authentification et ne conserve pas les messages bruts du serveur.
 
-Preferences and imported logos are personal data, stored locally and excluded from the source release.
-A complete single-file installer is not included yet. This repository currently provides source code and build/install scripts.
+## Développement
+
+Le projet associe un compagnon **C# / .NET** à un mod **C++ / Windhawk**. La suite compte **141 tests automatisés**, complétés par des vérifications de compilation, d’IPC et d’intégration dans Explorer.
+
+[Guide technique](docs/TECHNICAL.md) · [Validation](TESTS.md) · [Composants tiers](THIRD-PARTY-NOTICES.txt) · [Signaler un problème](https://github.com/HuRRR-ops/Codex-Hebdo/issues)
+
+L’intégration cible la barre horizontale principale de Windows 11 et dépend de structures internes de Windows. Les changements de DPI, de résolution et les configurations de barre des tâches nécessitent encore une validation plus large.
+
+## English
+
+**Your weekly Codex quota, right in the Windows 11 taskbar.** See your remaining percentage and available reset credits at a glance. Double-click the widget to customize text, import a logo, adjust spacing or choose one of six interface themes.
+
+Select **Général → Langue / Language → English** to switch the interface, widget and tooltips to English. Changes preview live; **Apply** saves them and **Cancel / Close** restores your saved settings.
+
+Windows 11 x64, a signed-in Codex installation, Windhawk and .NET 10 are required. This repository currently ships **source code and build/install scripts**; an all-in-one installer is not available yet. The reset counter is informational and never spends reset credits.
