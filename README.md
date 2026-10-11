@@ -8,10 +8,11 @@ Le mod ajoute un enfant à `SystemTrayFrameGrid`, avant les icônes de notificat
 
 ## Utilisation
 
-- **Double-clic uniquement** : ouvre les options sans effacer les statistiques. La fenêtre ne se redimensionne pas manuellement : elle adapte sa taille à l’onglet et au DPI. Clic simple et clic droit : aucun menu. Survol : quota et date/heure locale.
+- **Double-clic uniquement** : ouvre les options sans effacer les statistiques. La fenêtre ne se redimensionne pas manuellement : elle adapte sa taille à l’ouverture et au DPI, puis conserve ses dimensions pendant les réglages. Clic simple et clic droit : aucun menu. Survol : quota et date/heure locale.
 - Textes indépendants : couleur automatique ou personnalisée, gras, italique, taille et visibilité.
 - Logo PNG/SVG personnalisé, teinte, taille, visibilité et restauration du logo d’origine. L’import conserve les proportions et la transparence ; une copie PNG est intégrée aux préférences.
 - Espacements, centrage du titre et palette des seuils. Les grandes polices sont réduites si nécessaire pour tenir dans la barre des tâches.
+- Interface à navigation latérale, cartes arrondies et aperçu du widget. **Général → Couleurs de l’interface** : Référence, Glacier, Lavande, Rosé, Sable ou Minuit, avec couleur d’accent personnalisée. Les couleurs du widget restent indépendantes.
 - **Général → Langue / Language** : Français ou English, y compris le widget, les infobulles et les détails.
 - Aperçu en direct ; **Appliquer** enregistre, **Annuler/Fermer** restaure la dernière version enregistrée. Préférences locales dans `preferences.json`, conservées lors d’une mise à jour.
 - Général : actualisation manuelle et démarrage avec Windows. Aucun clic ne consomme de réinitialisation.
@@ -49,7 +50,7 @@ Sources : `Companion/` (C#), `Windhawk/` (C++), `Assets/lolo.svg` (logo fourni),
 
 `scripts\Test-Ipc.ps1` contrôle les échanges locaux ; `-Command R` demande une actualisation. Le protocole est un pipe Windows limité à l’utilisateur courant et à sa session. Explorer utilise des opérations overlapped sur un thread de travail ; son thread XAML ne reçoit que des valeurs en mémoire. Le code ne lit aucun fichier d’authentification et ne conserve aucun message brut du serveur. Un Job Object ferme le serveur enfant si le compagnon se termine.
 
-**Validation réalisée :** compilation C++/.NET, 102 tests, lecture du compte réel, notifications JSON-RPC simulées, IPC réel, actualisation manuelle, invalidation à l’arrêt, arrêt du processus enfant, désinstallation/réinstallation, chargement dans Explorer et insertion XAML. Voir `TESTS.md`.
+**Validation réalisée :** compilation C++/.NET, 141 tests, lecture du compte réel, notifications JSON-RPC simulées, IPC réel, actualisation manuelle, invalidation à l’arrêt, arrêt du processus enfant, désinstallation/réinstallation, chargement dans Explorer et insertion XAML. Voir `TESTS.md`.
 
 **Reste à confirmer visuellement :** rendu, infobulle et clic physique ; le service de capture Windows de cette session était indisponible. Les changements effectifs de DPI/résolution, la saturation par de nombreuses applications et le redémarrage complet d’Explorer n’ont pas été testés. L’intégration est prévue pour la barre horizontale principale ; elle dépend de structures privées Windows.
 

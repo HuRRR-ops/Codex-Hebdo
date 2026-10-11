@@ -114,12 +114,15 @@ internal static class Tests
         string temp = Path.Combine(Path.GetTempPath(),"CodexHebdo-test-"+Guid.NewGuid()+".json");
         PreferenceStore.FileName = temp;
         try {
-            PreferenceStore.Save(new() { Language="en", Percent=new(14,Bold:true,Italic:true), CounterGap=2 });
+            PreferenceStore.Save(new() { Language="en", UiTheme="midnight", UiAccent=0x345678, Percent=new(14,Bold:true,Italic:true), CounterGap=2 });
             PreferenceStore.Preview(new() { Language="fr" });
             Check(PreferenceStore.Saved.Language == "en", "preview does not save");
             PreferenceStore.Load();
             Check(PreferenceStore.Saved.Percent.Bold && PreferenceStore.Saved.Percent.Italic && PreferenceStore.Saved.CounterGap == 2, "preferences roundtrip");
             Check(BinaryPrimitives.ReadInt32LittleEndian(PreferenceStore.Packet.AsSpan(26*4)) == 1, "language IPC");
+            Check(PreferenceStore.Saved.UiTheme=="midnight" && PreferenceStore.Saved.UiAccent==0x345678,"UI theme and custom accent roundtrip");
+            Check(new Preferences { UiTheme="invalid", UiAccent=-50 }.Normalize() is { UiTheme:"reference",UiAccent:-1 },"UI theme fallback");
+            Check(SoftTheme.ContrastInk(Color.White).R<128 && SoftTheme.ContrastInk(Color.Black)==Color.White,"readable text on extreme custom accents");
             string svg = Path.ChangeExtension(temp,"svg");
             try {
                 File.WriteAllText(svg,"<svg xmlns='http://www.w3.org/2000/svg' width='20' height='10'><path fill='red' d='M0 0H20V10H0Z'/></svg>");
@@ -159,13 +162,15 @@ internal static class Tests
                     var tabs=form.Controls.OfType<TableLayoutPanel>().Single().Controls.OfType<TabControl>().Single();
                     sizes[1].Value=18;
                     var resetText=Children(form).OfType<Button>().Single(b => b.Text==Strings.Get("Par défaut",lang));
-                    resetText.PerformClick();
+                    for(int resetRun=0;resetRun<4;resetRun++) { resetText.PerformClick(); Application.DoEvents(); }
                     Check(sizes[1].Value==12 && BinaryPrimitives.ReadInt32LittleEndian(PreferenceStore.Packet.AsSpan(24))==12,"defaults update existing inputs and widget preview");
                     Check(BinaryPrimitives.ReadInt32LittleEndian(PreferenceStore.Packet.AsSpan(104))==(lang=="en"?1:0),"defaults preserve selected language");
+                    var stableBounds=form.Bounds;
+                    var updateDetails=typeof(OptionsForm).GetMethod("UpdateDetails",System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic)!;
                     int fullHeight=form.Height;
                     for(int tab=1;tab<tabs.TabCount;tab++) {
                         tabs.SelectedIndex=tab; form.PerformLayout(); Application.DoEvents();
-                        Check(form.Height<fullHeight,"options fit shorter tabs without user resizing");
+                        Check(form.Height==fullHeight,"navigation keeps the initial window size");
                         using var tabImage=new Bitmap(form.Width,form.Height);
                         form.DrawToBitmap(tabImage,new Rectangle(Point.Empty,form.Size));
                         if(args.Contains("--render-options")) tabImage.Save(Path.Combine(Path.GetTempPath(),$"CodexHebdo-options-{lang}-{tab}.png"));
@@ -176,9 +181,27 @@ internal static class Tests
                         form.SizeChanged+=onResize;
                         var reset=Children(form).OfType<Button>().Single(b => b.Text==Strings.Get("Par défaut",lang));
                         reset.PerformClick(); Application.DoEvents();
+                        updateDetails.Invoke(form,null); Application.DoEvents();
+                        Check(form.Bounds==stableBounds,"defaults and delayed statistics retain original window bounds");
                         form.SizeChanged-=onResize;
                         Check(controlsBefore.SequenceEqual(Children(form)) && controlsBefore.All(c => !c.IsDisposed),"defaults retain every control without rebuilding tabs");
                         Check(resized==0 && form.Bounds==boundsBefore && tabs.SelectedIndex==tab,"defaults preserve window bounds and selected tab");
+                        if(tab==4) {
+                            var baseline=PreferenceStore.Packet.AsSpan(8).ToArray();
+                            var themeButtons=Children(form).OfType<Button>().Where(b => b.Name.StartsWith("Theme-")).ToArray();
+                            foreach(var theme in themeButtons) {
+                                theme.PerformClick(); Application.DoEvents();
+                                Check(baseline.SequenceEqual(PreferenceStore.Packet.AsSpan(8).ToArray()),"UI theme leaves widget colors and quota settings untouched");
+                                Check(controlsBefore.SequenceEqual(Children(form)) && form.Bounds==boundsBefore,"theme changes retain controls and geometry");
+                            }
+                            Check(SoftTheme.Dark,"midnight palette applied");
+                            if(args.Contains("--render-options")) {
+                                using var darkImage=new Bitmap(form.Width,form.Height);form.DrawToBitmap(darkImage,new Rectangle(Point.Empty,form.Size));
+                                darkImage.Save(Path.Combine(Path.GetTempPath(),$"CodexHebdo-options-{lang}-midnight.png"));
+                            }
+                            reset.PerformClick();
+                            Check(!SoftTheme.Dark,"defaults restore reference palette");
+                        }
                     }
                 }
             }

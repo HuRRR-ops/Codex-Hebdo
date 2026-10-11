@@ -130,6 +130,7 @@ internal static class Program
         }
     }
 
+    internal static Reading? CurrentReading => Volatile.Read(ref current);
     internal static void RequestRefresh() => refresh.Writer.TryWrite(true);
     internal static string Details(string language = "fr")
     {

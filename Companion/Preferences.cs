@@ -14,6 +14,8 @@ internal sealed record TextStyle(int Size = 12, bool Visible = true, bool Bold =
 internal sealed record Preferences
 {
     public string Language { get; init; } = "fr";
+    public string UiTheme { get; init; } = "reference";
+    public int UiAccent { get; init; } = -1;
     public TextStyle Label { get; init; } = new(10);
     public TextStyle Percent { get; init; } = new();
     public TextStyle Credits { get; init; } = new();
@@ -31,6 +33,8 @@ internal sealed record Preferences
     public int Bad { get; init; } = 0xc3232a;
     public Preferences Normalize() => this with {
         Language = Language == "en" ? "en" : "fr",
+        UiTheme = UiTheme is "reference" or "glacier" or "lavender" or "rose" or "sand" or "midnight" ? UiTheme : "reference",
+        UiAccent = UiAccent < 0 ? -1 : UiAccent & 0xffffff,
         Label = (Label ?? new(10)).Normalize(), Percent = (Percent ?? new()).Normalize(), Credits = (Credits ?? new()).Normalize(),
         LogoSize = Math.Clamp(LogoSize, 12, 32), LogoGap = Math.Clamp(LogoGap, 0, 24),
         CounterGap = Math.Clamp(CounterGap, 0, 24), LineGap = Math.Clamp(LineGap, 0, 8),

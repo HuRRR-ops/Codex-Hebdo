@@ -10,6 +10,8 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <ItemGroup>
+    <EmbeddedResource Include="../Assets/calendar-mint.png" LogicalName="CodexHebdo.calendar.png" />
+    <EmbeddedResource Include="../Assets/lolo.svg" LogicalName="CodexHebdo.logo.svg" />
     <PackageReference Include="Svg.Skia" Version="5.2.3" />
   </ItemGroup>
 </Project>
