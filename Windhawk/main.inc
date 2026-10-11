@@ -89,14 +89,23 @@ static void Layout() {
         t.Width(NAN); t.Measure({1000,100}); return std::ceil(t.DesiredSize().Width)+2.;
     };
     g_credits.Margin({0,0,0,0});
+    g_label.Margin({0,0,0,0});
     double pw = width(g_percent), cw = width(g_credits), lw = width(g_label);
     double gap = pw && cw ? std::clamp(g_options[18],0,24) : 0;
     double row = pw+gap+cw, captionWidth = std::max(lw,row);
+    double labelLeft = (captionWidth-lw)/2, numbersLeft = (captionWidth-row)/2;
+    if (g_options[20] && pw > 0 && lw > 0) {
+        // Preserve the full measured title. Reserve space on the left when it is
+        // wider than the percentage, then align their centers without clipping.
+        numbersLeft = std::max(0.,(lw-pw)/2);
+        labelLeft = std::max(0.,(pw-lw)/2);
+        captionWidth = std::max(labelLeft+lw,numbersLeft+row);
+    }
     g_percent.Width(pw); g_credits.Width(cw); g_credits.Margin({gap,0,0,0});
-    g_label.Width((g_options[20] && pw) ? pw : captionWidth);
-    g_label.HorizontalAlignment((g_options[20] && pw)?xaml::HorizontalAlignment::Left:xaml::HorizontalAlignment::Center);
-    g_numbers.HorizontalAlignment(xaml::HorizontalAlignment::Center);
-    g_numbers.Margin({0,(g_options[3]&1)?lineGap:0,0,0});
+    g_label.Width(lw); g_label.Margin({labelLeft,0,0,0});
+    g_label.HorizontalAlignment(xaml::HorizontalAlignment::Left);
+    g_numbers.HorizontalAlignment(xaml::HorizontalAlignment::Left);
+    g_numbers.Margin({numbersLeft,(g_options[3]&1)?lineGap:0,0,0});
     double logoWidth = (g_options[15]&1) ? std::clamp(g_options[14],12,32) + (captionWidth?std::clamp(g_options[17],0,24):0) : 0;
     double total = std::max(24.,logoWidth+captionWidth);
     g_content.MinWidth(total); g_content.Width(total);
