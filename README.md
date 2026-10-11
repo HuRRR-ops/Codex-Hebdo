@@ -75,7 +75,17 @@ Ces couleurs sont personnalisables. Le compteur de réinitialisations est inform
 
 ## Installation
 
-> **Distribution actuelle : sources et scripts.** L’installateur unique incluant toutes les dépendances n’est pas encore disponible.
+### Télécharger la version prête à installer
+
+**[Télécharger Codex Hebdo 1.1.1 pour Windows x64](https://github.com/HuRRR-ops/Codex-Hebdo/releases/download/v1.1.1/CodexHebdo-1.1.1-win-x64.zip)**
+
+Extrayez toute l’archive, puis lancez **Installer.cmd**. Le programme et le mod sont déjà compilés : aucun SDK n’est nécessaire pour cette archive.
+
+Cette première release utilise **Windhawk portable 1.7.3**, **Codex connecté et accessible via `codex.exe`**, et le **runtime .NET Desktop 10 x64**, à installer séparément. Consultez `INSTALLATION.txt` dans l’archive pour les chemins personnalisés.
+
+[Notes de version et empreinte SHA-256](https://github.com/HuRRR-ops/Codex-Hebdo/releases/tag/v1.1.1)
+
+> Les dépendances ne sont pas incluses. L’installateur tout-en-un reste à préparer.
 
 ### Prérequis
 
@@ -128,4 +138,4 @@ L’intégration cible la barre horizontale principale de Windows 11 et dépend 
 
 Select **Général → Langue / Language → English** to switch the interface, widget and tooltips to English. Changes preview live; **Apply** saves them and **Cancel / Close** restores your saved settings.
 
-Windows 11 x64, a signed-in Codex installation, Windhawk and .NET 10 are required. This repository currently ships **source code and build/install scripts**; an all-in-one installer is not available yet. The reset counter is informational and never spends reset credits.
+Windows 11 x64, a signed-in Codex installation, Windhawk and .NET 10 are required. Download the **prebuilt Windows x64 ZIP** from [Releases](https://github.com/HuRRR-ops/Codex-Hebdo/releases/latest), extract it and run **Installer.cmd**. This package requires portable Windhawk 1.7.3 and .NET Desktop Runtime 10 x64. Dependencies are not bundled; an all-in-one installer is not available yet. The reset counter is informational and never spends reset credits.
