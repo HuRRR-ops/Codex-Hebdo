@@ -1,0 +1,18 @@
+**/bin/
+**/obj/
+preferences.json
+preferences.json.tmp
+codex-path.txt
+installation.json
+probe.json
+
+# Generated releases and local files
+/dist/
+*.zip
+*.pdb
+*.log
+.env
+.env.*
+*.pem
+*.key
+.vs/

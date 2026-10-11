@@ -1,0 +1,47 @@
+The layout lease, taskbar discovery, UI dispatch, and XamlRoot helpers in
+Windhawk/helpers.inc are adapted from taskbar-folder-menus.wh.cpp 2.1 by
+sb4ssman, obtained from ramensoftware/windhawk-mods on 2026-10-11.
+The repository README specifies MIT for mods without another declared license.
+Changes include fail-closed offset detection and offline-only symbol resolution.
+
+MIT License
+
+Copyright (c) 2026 sb4ssman and contributors
+Copyright (c) 2026 Codex Hebdo contributors (new application code)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+Assets/lolo.svg was supplied by the user. The OpenAI logo and associated
+trademarks remain the property of their respective owner; the code license
+does not grant trademark rights. This is an independent local utility.
+
+Windhawk is a separate dependency downloaded from its official distribution;
+its license and third-party notices remain applicable. Its binaries are not
+included in the Codex Hebdo project archive.
+
+Other references studied, without copying application code:
+rate-tray: 186528c061ed7fa8ac5a33c30c6eac9fd113d098
+CodexQuota: 3e1822713f2f7d1b4a3124b2f485324c5fcdf070
+
+Settings logo rendering uses Svg.Skia 5.2.3 (MIT), Svg.Custom / SVG.NET
+(MS-PL), SkiaSharp 4.148.0 (MIT), Skia (BSD), and HarfBuzzSharp / HarfBuzz
+(MIT / MIT-style). Their upstream license files are distributed under licenses/.
+Source: https://github.com/wieslawsoltes/Svg.Skia
+Source: https://github.com/mono/SkiaSharp
+Source: https://github.com/svg-net/SVG
