@@ -25,7 +25,7 @@ internal static class Program
     }
     internal static string Extract()
     {
-        string root=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"CodexHebdo-Setup","1.2.1",Guid.NewGuid().ToString("N"));
+        string root=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"CodexHebdo-Setup","1.2.2",Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(root);
         using var stream=Assembly.GetExecutingAssembly().GetManifestResourceStream("payload.zip")!;
         using var archive=new ZipArchive(stream,ZipArchiveMode.Read);
@@ -60,7 +60,7 @@ internal static class Program
             }
             report(line);
         }
-        Record("Codex Hebdo 1.2.1 - "+DateTimeOffset.Now.ToString("O"));
+        Record("Codex Hebdo 1.2.2 - "+DateTimeOffset.Now.ToString("O"));
         process.OutputDataReceived+=(_,e) => { if(e.Data is { } line) Record(line); };
         process.ErrorDataReceived+=(_,e) => { if(e.Data is { } line) Record(line); };
         process.Start();process.BeginOutputReadLine();process.BeginErrorReadLine();
@@ -76,7 +76,7 @@ internal static class Program
     }
     private static void Clean(string root)
     {
-        string expected=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"CodexHebdo-Setup","1.2.1");
+        string expected=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"CodexHebdo-Setup","1.2.2");
         var folder=new DirectoryInfo(Path.GetFullPath(root));
         if(!string.Equals(folder.Parent?.FullName,expected,StringComparison.OrdinalIgnoreCase) || !Guid.TryParseExact(folder.Name,"N",out _) || folder.LinkTarget is not null) return;
         try { folder.Delete(true); } catch(IOException) { } catch(UnauthorizedAccessException) { }
@@ -85,8 +85,9 @@ internal static class Program
 
 internal sealed class SetupForm : Form
 {
-    private readonly Label description=new() { AutoSize=false,Height=65,Dock=DockStyle.Top };
-    private readonly TextBox log=new() { Multiline=true,ReadOnly=true,ScrollBars=ScrollBars.Vertical,Dock=DockStyle.Fill,BorderStyle=BorderStyle.FixedSingle };
+    private readonly Label description=new() { AutoSize=true,Dock=DockStyle.Fill,ForeColor=Color.FromArgb(89,108,119),Margin=new Padding(0,0,0,22) };
+    private readonly TextBox log=new() { Multiline=true,ReadOnly=true,TabStop=false,HideSelection=true,ScrollBars=ScrollBars.Vertical,Dock=DockStyle.Fill,BorderStyle=BorderStyle.None,BackColor=Color.White,ForeColor=Color.FromArgb(53,73,84) };
+    private readonly Label activity=new() { AutoSize=true,Dock=DockStyle.Fill,Margin=new Padding(0,0,0,10) };
     private readonly Button install=new() { AutoSize=true,Text="Installer",BackColor=Color.FromArgb(9,155,139),ForeColor=Color.White,FlatStyle=FlatStyle.Flat,Padding=new Padding(14,5,14,5) };
     private readonly ComboBox language=new() { DropDownStyle=ComboBoxStyle.DropDownList,Width=110 };
     private readonly ProgressBar progress=new() { Dock=DockStyle.Bottom,Height=5 };
@@ -99,14 +100,15 @@ internal sealed class SetupForm : Form
         AutoScaleDimensions=new SizeF(96,96);AutoScaleMode=AutoScaleMode.Dpi;
         using var iconStream=Assembly.GetExecutingAssembly().GetManifestResourceStream("logo.ico")!;
         Icon=new Icon(iconStream);
-        Text="Codex Hebdo - Installation";Font=new Font("Segoe UI",10);ClientSize=new Size(570,400);
+        Text="Codex Hebdo - Installation";Font=new Font("Segoe UI",10);ClientSize=new Size(580,480);
         FormBorderStyle=FormBorderStyle.FixedDialog;MaximizeBox=false;StartPosition=FormStartPosition.CenterScreen;
-        BackColor=Color.FromArgb(244,250,250);Padding=new Padding(22);
-        var header=new FlowLayoutPanel { Dock=DockStyle.Top,Height=62,WrapContents=false };
+        BackColor=Color.FromArgb(244,250,250);Padding=new Padding(24);ForeColor=Color.FromArgb(28,48,61);
+        SuspendLayout();
+        var header=new FlowLayoutPanel { Dock=DockStyle.Fill,AutoSize=true,WrapContents=false,Margin=new Padding(0,0,0,14) };
         using var resource=Assembly.GetExecutingAssembly().GetManifestResourceStream("logo.png")!;
         using var logo=Image.FromStream(resource);
         var picture=new PictureBox { Image=new Bitmap(logo),SizeMode=PictureBoxSizeMode.Zoom,Size=new Size(45,48),Margin=new Padding(0,0,15,0) };
-        header.Controls.Add(picture);header.Controls.Add(new Label { Text="Codex Hebdo",AutoSize=true,Font=new Font("Segoe UI",20,FontStyle.Bold) });
+        header.Controls.Add(picture);header.Controls.Add(new Label { Text="Codex Hebdo",AutoSize=true,Font=new Font("Segoe UI Semibold",19),Margin=new Padding(0,4,0,0) });
         var footer=new TableLayoutPanel { Dock=DockStyle.Bottom,AutoSize=true,AutoSizeMode=AutoSizeMode.GrowAndShrink,ColumnCount=4,RowCount=1,Padding=new Padding(0,12,0,0),Margin=Padding.Empty };
         footer.ColumnStyles.Add(new ColumnStyle(SizeType.Percent,100));
         for(int i=0;i<3;i++) footer.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
@@ -114,12 +116,34 @@ internal sealed class SetupForm : Form
         foreach(Control control in new Control[]{language,cancel,install}) { control.Anchor=AnchorStyles.None;control.Margin=new Padding(8,0,0,0); }
         install.AutoSizeMode=cancel.AutoSizeMode=AutoSizeMode.GrowAndShrink;
         language.Items.AddRange(["Français","English"]);language.SelectedIndex=CultureInfo.CurrentUICulture.TwoLetterISOLanguageName=="fr"?0:1;
-        footer.Controls.Add(language,1,0);footer.Controls.Add(cancel,2,0);footer.Controls.Add(install,3,0);
-        Controls.Add(log);Controls.Add(description);Controls.Add(header);Controls.Add(progress);Controls.Add(footer);
+        language.Anchor=AnchorStyles.Left;language.Margin=Padding.Empty;
+        footer.Controls.Add(language,0,0);footer.Controls.Add(cancel,2,0);footer.Controls.Add(install,3,0);
+        footer.Padding=new Padding(0,18,0,0);
+        install.FlatAppearance.BorderSize=0;
+        install.FlatAppearance.MouseOverBackColor=Color.FromArgb(7,135,122);
+        cancel.FlatStyle=FlatStyle.Flat;cancel.BackColor=Color.White;
+        cancel.FlatAppearance.BorderColor=Color.FromArgb(215,229,229);
+        install.MinimumSize=cancel.MinimumSize=new Size(104,40);
+        activity.Font=new Font("Segoe UI Semibold",10);
+        var journal=new Panel { Dock=DockStyle.Fill,BackColor=Color.White,Padding=new Padding(14),Margin=Padding.Empty };
+        journal.Controls.Add(log);
+        var content=new TableLayoutPanel { Dock=DockStyle.Fill,ColumnCount=1,RowCount=6,Margin=Padding.Empty };
+        content.ColumnStyles.Add(new ColumnStyle(SizeType.Percent,100));
+        for(int i=0;i<3;i++) content.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        content.RowStyles.Add(new RowStyle(SizeType.Percent,100));
+        content.RowStyles.Add(new RowStyle(SizeType.Absolute,5));
+        content.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        progress.Dock=DockStyle.Fill;progress.Margin=Padding.Empty;
+        footer.Dock=DockStyle.Fill;
+        content.Controls.Add(header,0,0);content.Controls.Add(description,0,1);
+        content.Controls.Add(activity,0,2);content.Controls.Add(journal,0,3);
+        content.Controls.Add(progress,0,4);content.Controls.Add(footer,0,5);
+        Controls.Add(content);
+        ResumeLayout(true);
         language.SelectedIndexChanged+=(_,_) => Translate();Translate();
         install.Click+=async (_,_) => {
             if(complete) {Close();return;}
-            busy=true;committing=false;cancellation=new();install.Enabled=false;language.Enabled=false;progress.Style=ProgressBarStyle.Marquee;log.Clear();
+            busy=true;committing=false;cancellation=new();install.Enabled=false;language.Enabled=false;progress.Style=ProgressBarStyle.Marquee;log.Clear();Translate();
             try {
                 Add(French?"Préparation de l’installation…":"Preparing installation…");
                 string root=await Task.Run(Program.Extract);
@@ -136,6 +160,7 @@ internal sealed class SetupForm : Form
     }
     private void Translate()
     {
+        activity.Text=complete?(French?"Installation terminée":"Installation complete"):(busy?(French?"Installation en cours":"Installing"):(French?"Prêt à installer":"Ready to install"));
         description.Text=French?"Installation automatique du widget et des composants manquants. Internet est requis. Si nécessaire, connectez votre compte Codex dans le navigateur qui s’ouvrira.":"Automatically install the widget and missing components. Internet is required. If needed, sign in to Codex in the browser that opens.";
         install.Text=complete?(French?"Fermer":"Close"):(French?"Installer":"Install");
         cancel.Text=French?"Annuler":"Cancel";cancel.Visible=!complete;
