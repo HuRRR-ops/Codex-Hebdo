@@ -25,7 +25,7 @@ internal static class Program
     }
     internal static string Extract()
     {
-        string root=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"CodexHebdo-Setup","1.2.2",Guid.NewGuid().ToString("N"));
+        string root=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"CodexHebdo-Setup","1.2.3",Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(root);
         using var stream=Assembly.GetExecutingAssembly().GetManifestResourceStream("payload.zip")!;
         using var archive=new ZipArchive(stream,ZipArchiveMode.Read);
@@ -60,7 +60,7 @@ internal static class Program
             }
             report(line);
         }
-        Record("Codex Hebdo 1.2.2 - "+DateTimeOffset.Now.ToString("O"));
+        Record("Codex Hebdo 1.2.3 - "+DateTimeOffset.Now.ToString("O"));
         process.OutputDataReceived+=(_,e) => { if(e.Data is { } line) Record(line); };
         process.ErrorDataReceived+=(_,e) => { if(e.Data is { } line) Record(line); };
         process.Start();process.BeginOutputReadLine();process.BeginErrorReadLine();
@@ -76,7 +76,7 @@ internal static class Program
     }
     private static void Clean(string root)
     {
-        string expected=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"CodexHebdo-Setup","1.2.2");
+        string expected=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"CodexHebdo-Setup","1.2.3");
         var folder=new DirectoryInfo(Path.GetFullPath(root));
         if(!string.Equals(folder.Parent?.FullName,expected,StringComparison.OrdinalIgnoreCase) || !Guid.TryParseExact(folder.Name,"N",out _) || folder.LinkTarget is not null) return;
         try { folder.Delete(true); } catch(IOException) { } catch(UnauthorizedAccessException) { }

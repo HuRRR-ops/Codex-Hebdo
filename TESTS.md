@@ -1,5 +1,9 @@
 # Validation - Codex Hebdo 1.1.1
 
+## Release 1.2.3
+
+141 tests applicatifs, 8 tests d'installation et 5 vérifications de récupération des symboles. Publication autonome Windows x64 et vérification de l'intégrité du contenu embarqué. Le script de récupération est inclus dans la sortie publiée du compagnon. La récupération a été exercée sur les symboles de la version Windows installée ; aucun nouveau redémarrage Windows n'a été effectué pour cette validation.
+
 102 tests automatisés réussis sous Windows 11 x64, .NET 10 et Windhawk 1.7.3.
 
 ## Couverture
@@ -51,7 +55,7 @@ très chargées et un redémarrage complet d’Explorer restent à valider. Le w
 de structures privées Windows et vise la barre horizontale principale de Windows 11 x64.
 
 
-## Installateur 1.2.2
+## Installateur 1.2.3
 
 - 141 tests applicatifs et 8 tests dédiés au téléchargement, au cache, à l’intégrité, aux codes de sortie et aux délais des processus.
 - Construction autonome Windows x64 et vérification SHA-256 de tous les fichiers du paquet intégré.
