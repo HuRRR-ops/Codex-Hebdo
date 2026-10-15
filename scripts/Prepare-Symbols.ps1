@@ -1,9 +1,38 @@
-param([Parameter(Mandatory=$true)][string]$WindhawkPath)
+param([string]$WindhawkPath, [switch]$RepairMod, [switch]$FunctionsOnly)
 $ErrorActionPreference = 'Stop'
+function Repair-TaskbarMod([string]$Data, [string]$Key, [bool]$Downloaded) {
+    $mod = Join-Path $Data 'Engine\Mods\codex-hebdo-taskbar.ini'
+    $cache = Join-Path $Data 'Engine\ModsWritable\codex-hebdo-taskbar.ini'
+    if (!(Test-Path -LiteralPath $mod)) { return }
+    $settings = [IO.File]::ReadAllText($mod)
+    if ($settings -notmatch '(?m)^Disabled=0\s*$') { return }
+    $cached = if (Test-Path -LiteralPath $cache) { [IO.File]::ReadAllText($cache) } else { '' }
+    $errorPattern = '(?m)^pdb_' + [regex]::Escape($Key) + '=error:[^\r\n]*\r?\n?'
+    if (!$Downloaded -and $cached -notmatch $errorPattern) { return }
+    if ($cached -match $errorPattern) {
+        [IO.File]::WriteAllText($cache, [regex]::Replace($cached, $errorPattern, ''), [Text.Encoding]::Unicode)
+    }
+    # Reload only our enabled mod. Windhawk observes this file; Explorer stays running.
+    [IO.File]::WriteAllText($mod, ($settings -replace '(?m)^Disabled=0','Disabled=1'), [Text.Encoding]::Unicode)
+    try { Start-Sleep -Seconds 2 }
+    finally {
+        # Respect a concurrent change made by the user in Windhawk.
+        $disabled = $settings -replace '(?m)^Disabled=0','Disabled=1'
+        if ([IO.File]::ReadAllText($mod) -eq $disabled) {
+            [IO.File]::WriteAllText($mod, $settings, [Text.Encoding]::Unicode)
+        }
+    }
+}
+if ($FunctionsOnly) { return }
+if (!$WindhawkPath) { throw 'WindhawkPath requis.' }
 $ini = Get-Content -LiteralPath (Join-Path $WindhawkPath 'windhawk.ini') -Raw
 if ($ini -notmatch '(?m)^AppDataPath=(.+)$') { throw 'AppDataPath Windhawk introuvable.' }
 $data = [Environment]::ExpandEnvironmentVariables($Matches[1].Trim())
 if (![IO.Path]::IsPathRooted($data)) { $data = Join-Path $WindhawkPath $data }
+if ($RepairMod) {
+    $mod = Join-Path $data 'Engine\Mods\codex-hebdo-taskbar.ini'
+    if (!(Test-Path -LiteralPath $mod) -or [IO.File]::ReadAllText($mod) -notmatch '(?m)^Disabled=0\s*$') { return }
+}
 $bytes = [IO.File]::ReadAllBytes((Join-Path $env:WINDIR 'System32\taskbar.dll'))
 # Read the PE debug-directory (CodeView RSDS), never guess the PDB for a build.
 $pe = [BitConverter]::ToInt32($bytes,0x3c)
@@ -41,6 +70,7 @@ for ($i=0; $i -lt $debugSize; $i+=28) {
 if (!$key) { throw 'Signature PDB introuvable.' }
 $folder = Join-Path $data "Engine\Symbols\Taskbar.pdb\$key"
 $pdb = Join-Path $folder 'Taskbar.pdb'
+$downloaded = $false
 if (!(Test-Path -LiteralPath $pdb)) {
     New-Item -ItemType Directory -Force $folder | Out-Null
     $temporary = Join-Path $folder ([guid]::NewGuid().ToString('N') + '.download')
@@ -50,6 +80,8 @@ if (!(Test-Path -LiteralPath $pdb)) {
         try { $header=[byte[]]::new(24); [void]$stream.Read($header,0,24) } finally { $stream.Dispose() }
         if (![Text.Encoding]::ASCII.GetString($header).StartsWith('Microsoft C/C++ MSF')) { throw 'Fichier PDB inattendu.' }
         Move-Item -LiteralPath $temporary -Destination $pdb
+        $downloaded = $true
     } finally { if (Test-Path -LiteralPath $temporary) { Remove-Item -LiteralPath $temporary } }
 }
+if ($RepairMod) { Repair-TaskbarMod $data $key $downloaded }
 Write-Host "Symboles Taskbar prêts (hors Explorer) : $key"

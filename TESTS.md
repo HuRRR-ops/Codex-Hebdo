@@ -4,6 +4,8 @@
 
 ## Couverture
 
+- Récupération après mise à jour Windows : `powershell -NoProfile -ExecutionPolicy Bypass -File Tests/TaskbarRecovery.Tests.ps1` vérifie la suppression ciblée du cache en erreur, la conservation des autres entrées, la restauration après rechargement, l'absence de rechargement inutile et le respect des modules désactivés.
+
 - Sélection du quota hebdomadaire (10 080 minutes), rejet des réponses ambiguës,
   calcul du restant et expiration des données après 75 secondes.
 - Compteur de réinitialisations : valeurs inconnues, zéro, fraîcheur indépendante

@@ -10,6 +10,7 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="../scripts/Prepare-Symbols.ps1" Link="Prepare-Symbols.ps1" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <EmbeddedResource Include="../Assets/calendar-mint.png" LogicalName="CodexHebdo.calendar.png" />
     <EmbeddedResource Include="../Assets/lolo.svg" LogicalName="CodexHebdo.logo.svg" />
     <PackageReference Include="Svg.Skia" Version="5.2.3" />

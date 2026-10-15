@@ -44,7 +44,7 @@ internal static class Program
         using var cts = new CancellationTokenSource();
         var stopRegistration = ThreadPool.RegisterWaitForSingleObject(stop, (_, _) => cts.Cancel(), null, Timeout.Infinite, true);
         Console.CancelKeyPress += (_, e) => { e.Cancel = true; cts.Cancel(); };
-        try { await Task.WhenAll(Poll(cts.Token), Serve(cts.Token)); }
+        try { await Task.WhenAll(Poll(cts.Token), Serve(cts.Token), TaskbarRecovery.Run(cts.Token)); }
         catch (OperationCanceledException) { }
         finally { stopRegistration.Unregister(null); }
         return 0;

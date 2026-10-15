@@ -38,7 +38,7 @@ Dépendances : Windows 11 x64, runtime .NET Desktop 10 x64, Codex déjà connect
 
 Pour une installation **standard** de Windhawk, le script installe le compagnon puis indique l’étape manuelle : Windhawk → **Créer un nouveau mod** → remplacer le code par `dist\codex-hebdo-taskbar.wh.cpp` → **Compiler (F7)** et activer. Pour une installation portable, le script configure aussi le mod automatiquement.
 
-Les symboles de `taskbar.dll` sont préparés par PowerShell avant activation. Le mod désactive explicitement les serveurs de symboles et caches en ligne dans Explorer. Après une mise à jour Windows changeant `taskbar.dll`, relancer `Install.ps1` pour préparer les nouveaux symboles. Une structure privée non reconnue fait refuser l’intégration plutôt que deviner un offset.
+Les symboles de `taskbar.dll` sont préparés par PowerShell avant activation. Le mod désactive explicitement les serveurs de symboles et caches en ligne dans Explorer. Le compagnon vérifie également les symboles au lancement puis toutes les cinq minutes, dans un processus séparé. Après une mise à jour Windows, il récupère le PDB correspondant depuis Microsoft, efface uniquement l'erreur de cache associée et recharge le module Codex Hebdo si celui-ci est activé. Une connexion indisponible déclenche une nouvelle tentative au passage suivant ; les autres modules restent intacts. Cette récupération automatique concerne les installations portables configurées par notre installateur. Une structure privée non reconnue fait toujours refuser l’intégration plutôt que deviner un offset.
 
 ## Compilation et tests
 
