@@ -108,3 +108,13 @@ de structures privées Windows et vise la barre horizontale principale de Window
 - Lecture réussie du quota réel avec le Codex téléchargé.
 - Installation par le fichier Setup.exe sur la machine de développement : code de sortie 0, préférences inchangées, autostart conservé, runtime local présent et widget attaché.
 - Une machine Windows vierge, le parcours navigateur d’un nouveau compte et les configurations Windhawk standard ne sont pas couverts par ces essais. Windhawk standard n’est pas migré automatiquement.
+
+### Isolation Windhawk (prévention des conflits avec les jeux)
+
+`Tests/WindhawkIsolation.Tests.ps1` : 9 contrôles couvrent provenance, migration,
+encodage UTF-16, ciblage absolu d'Explorer, idempotence et préservation des réglages
+personnalisés et des autres mods (y compris désactivés).
+`Tests/InstallEntry.Tests.ps1` : 9 contrôles, dont retrait des réglages au rollback,
+installation effective du fichier et demande de redémarrage du moteur actif.
+Ces tests utilisent des dossiers temporaires et des processus simulés. Ils ne
+prouvent ni la compatibilité d'un jeu particulier ni le rendu du widget en session.

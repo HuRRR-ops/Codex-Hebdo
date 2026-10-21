@@ -2,6 +2,7 @@
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 . (Join-Path $PSScriptRoot 'scripts\Install-Transaction.ps1')
+. (Join-Path $PSScriptRoot 'scripts\Windhawk-Isolation.ps1')
 $destination = Join-Path $env:LOCALAPPDATA 'CodexHebdo'
 $source = Join-Path $PSScriptRoot 'dist\Companion'
 if (!(Test-Path (Join-Path $source 'CodexHebdo.exe'))) { throw 'Exécuter Build.ps1 avant installation.' }
@@ -47,10 +48,13 @@ if (Test-Path -LiteralPath $iniPath) {
     $portable = $ini -match '(?m)^Portable=1\s*$'
 }
 $nativeInstalled = $false
+$isolation = @{ File=$null; Status='preserved' }
 if ($portable) {
     if ($ini -notmatch '(?m)^AppDataPath=(.+)$') { throw 'AppDataPath Windhawk introuvable.' }
     $appData = [Environment]::ExpandEnvironmentVariables($Matches[1].Trim())
     if (![IO.Path]::IsPathRooted($appData)) { $appData = Join-Path $WindhawkPath $appData }
+    $isolation = Get-WindhawkIsolationPlan -WindhawkPath $WindhawkPath -AppDataPath $appData -InstallationFile (Join-Path $destination 'installation.json')
+    if ($isolation.File) { $files.Add($isolation.File) }
     $mods = Join-Path $appData 'Engine\Mods'
     $dll = Join-Path $PSScriptRoot 'dist\codex-hebdo-taskbar.dll'
     if (!(Test-Path $dll)) { throw 'Compiler le module natif avec Build.ps1 -WindhawkPath.' }
@@ -91,6 +95,7 @@ if ($RegisterUninstall) {
     foreach ($name in $values.Keys) { $registry.Add(@{ Key='Software\Microsoft\Windows\CurrentVersion\Uninstall\CodexHebdo'; Name=$name; Value=$values[$name] }) }
 }
 $wasRunning = @(Get-Process CodexHebdo -ErrorAction SilentlyContinue | Where-Object Path -eq $oldExe).Count -gt 0
+$windhawkWasRunning = @(Get-Process windhawk -ErrorAction SilentlyContinue | Where-Object Path -eq (Join-Path $WindhawkPath 'windhawk.exe')).Count -gt 0
 $stopCompanion = {
     if (Test-Path -LiteralPath $oldExe) {
         Start-Process -FilePath $oldExe -ArgumentList '--stop' -WindowStyle Hidden -Wait
@@ -101,11 +106,18 @@ $stopCompanion = {
 Invoke-InstallTransaction -Files $files.ToArray() -RegistryValues $registry.ToArray() -Stop $stopCompanion -Start {
     if (!$NoStart) {
         Start-Process -FilePath $oldExe -WindowStyle Hidden
-        Start-Process -FilePath (Join-Path $WindhawkPath 'windhawk.exe') -ArgumentList '-tray-only' -WindowStyle Hidden
+        $windhawkArguments = if ($isolation.File -and $windhawkWasRunning) { '-restart -tray-only' } else { '-tray-only' }
+        Start-Process -FilePath (Join-Path $WindhawkPath 'windhawk.exe') -ArgumentList $windhawkArguments -WindowStyle Hidden
     }
 } -RestartPrevious {
+    if ($isolation.File -and $windhawkWasRunning -and !$NoStart) {
+        Start-Process -FilePath (Join-Path $WindhawkPath 'windhawk.exe') -ArgumentList '-restart -tray-only' -WindowStyle Hidden
+    }
     if ($wasRunning) { Start-Process -FilePath $oldExe -WindowStyle Hidden }
 }
+if ($isolation.Status -eq 'preserved') { Write-Warning 'Configuration Windhawk partagee/personnalisee conservee : restriction globale a Explorer non appliquee.' }
+elseif ($NoStart -and $isolation.File) { Write-Warning 'Restriction a Explorer enregistree. Redemarrer Windhawk pour l appliquer aux prochains lancements de jeux.' }
+else { Write-Host 'Windhawk limite a Explorer. Relancer les jeux deja ouverts pour beneficier de cette restriction.' }
 if ($nativeInstalled) { Write-Host "Installé : $destination. Démarrage automatique configuré pour cet utilisateur." }
 else {
     Write-Host "Compagnon installé. Dans Windhawk : Créer un nouveau mod, remplacer le code par $destination\codex-hebdo-taskbar.wh.cpp, puis Compiler (F7) et activer."

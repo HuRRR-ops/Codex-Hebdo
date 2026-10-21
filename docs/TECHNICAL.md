@@ -93,3 +93,32 @@ Ou lancer `%LOCALAPPDATA%\CodexHebdo\Uninstall.ps1`. Le script retire le compagn
 - [rate-tray](https://github.com/nowrap/rate-tray) : transport Codex et gestion des limites ; aucune lecture de jetons reprise.
 - [CodexQuota](https://github.com/JulienMaille/CodexQuota) : comportement et positionnement ; sa fenêtre rattachée à la barre n’est pas utilisée ici.
 
+
+## Restriction du moteur Windhawk à Explorer
+
+L'installateur limite désormais le moteur à l'exécutable Windows `explorer.exe` :
+`AppData/Engine/settings.ini` contient `Exclude=*` et `Include=C:\Windows\explorer.exe`
+(chemin Windows calculé sur la machine). Le ciblage du mod seul ne suffit pas :
+Windhawk injecte normalement son moteur dans de nombreux autres processus.
+Cette restriction conserve le code et le rendu du widget et évite cette injection
+pour les jeux, quel que soit leur magasin ou dossier.
+
+La configuration est créée uniquement pour le portable 1.7.3 préparé par Codex Hebdo,
+ou une ancienne installation identifiée par `installation.json`, sans autre mod
+(même désactivé) et sans fichier de réglages moteur préexistant. Les installations
+partagées ou personnalisées restent intactes et affichent un avertissement.
+Les nouveaux portables portent le marqueur `codex-hebdo-managed.txt`.
+
+Le fichier participe à la transaction et est retiré en cas d'échec. Si Windhawk
+était actif, l'installation demande son redémarrage via `-restart -tray-only`.
+Avec `-NoStart`, redémarrer Windhawk manuellement avant de relancer les jeux.
+Relancer les jeux déjà ouverts ; une modification de réglage ne garantit pas le
+déchargement du moteur de processus existants. Les réglages restent dans Windhawk
+après désinstallation de Codex Hebdo : les revoir avant d'ajouter d'autres mods.
+
+Il s'agit d'une prévention générale, pas d'une confirmation du correctif d'un jeu
+GOG non identifié. Aucun test du jeu signalé ni du rendu en session réelle avec
+cette restriction n'a été réalisé. Windhawk indique que la restriction peut retarder
+l'injection ; notre module recherche périodiquement la barre des tâches, mais la
+validation interactive reste nécessaire.
+Source : [documentation Windhawk](https://github.com/ramensoftware/windhawk/wiki/Injection-targets-and-critical-system-processes).

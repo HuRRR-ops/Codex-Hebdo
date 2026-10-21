@@ -54,4 +54,5 @@ AppDataPath=AppData
 Portable=1
 AppDataPath=..\..\AppData\Engine
 '@ | Set-Content -LiteralPath (Join-Path $destination 'Engine\1.7.3\engine.ini') -Encoding Unicode
+[IO.File]::WriteAllText((Join-Path $destination 'codex-hebdo-managed.txt'),'Created by Codex Hebdo')
 Write-Output $destination

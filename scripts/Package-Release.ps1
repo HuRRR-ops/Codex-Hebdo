@@ -11,6 +11,7 @@ foreach ($file in @('Install.ps1','Uninstall.ps1','LICENSE','THIRD-PARTY-NOTICES
 Copy-Item -LiteralPath (Join-Path $root 'licenses') -Destination $package -Recurse
 Copy-Item -LiteralPath (Join-Path $root 'scripts\Prepare-Symbols.ps1') -Destination (Join-Path $package 'scripts')
 Copy-Item -LiteralPath (Join-Path $root 'scripts\Install-Transaction.ps1') -Destination (Join-Path $package 'scripts')
+Copy-Item -LiteralPath (Join-Path $root 'scripts\Windhawk-Isolation.ps1') -Destination (Join-Path $package 'scripts')
 Copy-Item -LiteralPath (Join-Path $output 'Companion') -Destination (Join-Path $package 'dist') -Recurse
 foreach ($file in @('codex-hebdo-taskbar.dll','codex-hebdo-taskbar.wh.cpp')) {
     Copy-Item -LiteralPath (Join-Path $output $file) -Destination (Join-Path $package 'dist')

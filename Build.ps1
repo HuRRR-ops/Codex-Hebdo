@@ -9,7 +9,7 @@ $parts = @('header.inc','helpers.inc','logo.inc','main.inc') | ForEach-Object { 
 [IO.File]::WriteAllText($native, ($parts -join "`n"), [Text.UTF8Encoding]::new($false))
 dotnet run --project (Join-Path $root 'Tests') -c Release
 if ($LASTEXITCODE -ne 0) { throw 'Tests échoués.' }
-foreach ($suite in @('Installer','TaskbarRecovery','WindhawkPreparation','SymbolCache','InstallTransaction','InstallEntry')) {
+foreach ($suite in @('Installer','TaskbarRecovery','WindhawkPreparation','SymbolCache','InstallTransaction','InstallEntry','WindhawkIsolation')) {
     & powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $root "Tests\$suite.Tests.ps1")
     if ($LASTEXITCODE -ne 0) { throw "PowerShell tests failed: $suite" }
 }

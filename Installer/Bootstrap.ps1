@@ -102,6 +102,7 @@ try {
         "[Storage]`r`nPortable=1`r`nAppDataPath=..\..\AppData\Engine" | Set-Content (Join-Path $pending 'Engine\1.7.3\engine.ini') -Encoding Unicode
         New-Item -ItemType Directory -Force (Split-Path $windhawk -Parent) | Out-Null
         if(Test-Path -LiteralPath $windhawk) { throw 'Windhawk destination already exists; refusing to overwrite it.' }
+        [IO.File]::WriteAllText((Join-Path $pending 'codex-hebdo-managed.txt'),'Created by Codex Hebdo')
         Move-Item -LiteralPath $pending -Destination $windhawk
         Remove-Extraction $unpack
     }
