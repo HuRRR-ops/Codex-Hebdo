@@ -1,10 +1,55 @@
-# Validation - Codex Hebdo 1.1.1
+# Validation - Codex Hebdo
+
+## Correctifs de fiabilité — 21 octobre 2026
+
+Les suites PowerShell sont exécutées par `Build.ps1` sous Windows PowerShell 5.1.
+Elles peuvent aussi être exécutées sous PowerShell 7 :
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File Tests/WindhawkPreparation.Tests.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File Tests/SymbolCache.Tests.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File Tests/InstallTransaction.Tests.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File Tests/InstallEntry.Tests.ps1
+```
+
+- 12 contrôles de préparation Windhawk : lecture réelle des deux INI UTF-16 par
+  l'API Win32 (BOM, Portable et AppDataPath), avec distribution factice, puis
+  réparation de fichiers existants en UTF-8 BOM en conservant leurs valeurs.
+- 18 contrôles du cache de symboles : structure MSF, GUID, âges Info/DBI,
+  troncature, indices invalides, corruption détectée par SHA-256, cache valide,
+  téléchargement invalide et reprise après indisponibilité du réseau.
+- 12 contrôles transactionnels : prévalidation, panne après écriture, fichier
+  verrouillé, restauration des fichiers/configurations, valeurs et types du
+  registre, nettoyage, redémarrage précédent et succès complet.
+- 6 contrôles du véritable point d'entrée Install.ps1 : DLL manquante avant
+  arrêt, échec de lancement, restauration du compagnon et du mod, puis installation
+  réussie sans remplacement des préférences. Processus et réseau sont simulés.
+
+Ces tests utilisent des dossiers temporaires et une clé de registre de test
+distincte. Ils n'installent pas de mod dans Explorer. Les 141 assertions C#,
+8 tests des helpers de l'installateur et 5 contrôles de rechargement restent en place.
+
+Le validateur a également été vérifié en lecture seule sur deux PDB Taskbar
+Microsoft présents sur la machine. Un téléchargement réel depuis Microsoft,
+la réparation du fichier volontairement corrompu et la réutilisation du cache
+ont été exercés dans un dossier isolé, sans toucher aux symboles installés.
+Le format suit la documentation
+[MSF LLVM](https://llvm.org/docs/PDB/MsfFile.html) ; les règles d'âge suivent
+[PDB1::OpenValidate4 de Microsoft](https://github.com/microsoft/microsoft-pdb/blob/master/PDB/dbi/pdb.cpp).
+Un PDB public peut avoir un âge Info supérieur à l'âge de l'image, tandis que
+l'âge DBI doit correspondre (sauf l'ancien cas DBI zéro).
+
+Le retour arrière couvre les erreurs détectées dans la transaction, y compris
+les fichiers de licence, l'autostart et l'inscription de désinstallation du Setup.
+Une coupure de courant ou une terminaison forcée de PowerShell n'est pas une
+transaction récupérée automatiquement. Si la restauration échoue elle-même,
+les sauvegardes et leur manifeste sont conservés et leur chemin est signalé.
 
 ## Release 1.2.3
 
 141 tests applicatifs, 8 tests d'installation et 5 vérifications de récupération des symboles. Publication autonome Windows x64 et vérification de l'intégrité du contenu embarqué. Le script de récupération est inclus dans la sortie publiée du compagnon. La récupération a été exercée sur les symboles de la version Windows installée ; aucun nouveau redémarrage Windows n'a été effectué pour cette validation.
 
-102 tests automatisés réussis sous Windows 11 x64, .NET 10 et Windhawk 1.7.3.
+Les résultats ci-dessous décrivent les validations historiques de la release 1.2.3.
 
 ## Couverture
 

@@ -1,4 +1,4 @@
-param([ValidateSet('fr','en')][string]$Language='fr', [switch]$Unattended, [switch]$PrepareOnly, [string]$PreparationRoot, [switch]$FunctionsOnly)
+﻿param([ValidateSet('fr','en')][string]$Language='fr', [switch]$Unattended, [switch]$PrepareOnly, [string]$PreparationRoot, [switch]$FunctionsOnly)
 $ErrorActionPreference='Stop'
 Set-StrictMode -Version Latest
 [Console]::OutputEncoding=[Text.UTF8Encoding]::new($false)
@@ -155,15 +155,7 @@ try {
         Start-Sleep -Milliseconds 100
     }
     Check-Directory (Join-Path $env:LOCALAPPDATA 'CodexHebdo')
-    & (Join-Path $PSScriptRoot 'Install.ps1') -WindhawkPath $windhawk -CodexPath $codex
-    $destination=Join-Path $env:LOCALAPPDATA 'CodexHebdo'
-    Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'licenses') -Destination $destination -Recurse -Force
-    foreach($file in @('LICENSE','THIRD-PARTY-NOTICES.txt')) { Copy-Item -LiteralPath (Join-Path $PSScriptRoot $file) -Destination $destination -Force }
-    $uninstall='HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\CodexHebdo'
-    New-Item -Path $uninstall -Force | Out-Null
-    $shell=Join-Path $env:WINDIR 'System32\WindowsPowerShell\v1.0\powershell.exe'
-    $values=@{ DisplayName='Codex Hebdo';DisplayVersion='1.2.3';Publisher='Codex Hebdo';InstallLocation=$destination;DisplayIcon=(Join-Path $destination 'CodexHebdo.exe');UninstallString=('"'+$shell+'" -NoProfile -ExecutionPolicy Bypass -File "'+(Join-Path $destination 'Uninstall.ps1')+'"') }
-    foreach($name in $values.Keys) { New-ItemProperty -Path $uninstall -Name $name -Value $values[$name] -PropertyType String -Force | Out-Null }
+    & (Join-Path $PSScriptRoot 'Install.ps1') -WindhawkPath $windhawk -CodexPath $codex -RegisterUninstall
     Say 'Codex Hebdo est installé. Les préférences existantes sont conservées.' 'Codex Hebdo is installed. Existing preferences were preserved.'
     exit 0
 } catch {

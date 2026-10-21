@@ -4,6 +4,28 @@ La release 1.2.3 fournit un installateur automatique Windows x64. Il inclut .NET
 
 Les instructions ci-dessous concernent la compilation et l’installation manuelles. Compiler avec `Build.ps1` avant de lancer `Install.ps1`.
 
+### Durcissement de l'installation et du cache
+
+La préparation manuelle écrit les INI Windhawk en UTF-16, y compris sous Windows
+PowerShell 5.1. Les symboles présents sont vérifiés avant réutilisation : structure
+MSF, identité GUID et âges Info/DBI compatibles avec l'image Windows. Une empreinte
+SHA-256 locale détecte les modifications ultérieures. Un téléchargement de
+remplacement doit passer la validation avant de remplacer atomiquement le fichier.
+Cette empreinte locale n'est pas une signature de l'éditeur ; les anciens caches
+sans empreinte sont d'abord validés structurellement avant création de l'empreinte.
+
+`Install.ps1` prépare et sauvegarde tous les fichiers avant d'arrêter le compagnon.
+En cas d'erreur détectée, il restaure les fichiers, la configuration du mod et les
+valeurs du registre modifiées, puis redémarre le compagnon s'il fonctionnait avant
+la tentative. Les préférences sont exclues des fichiers remplacés. Le Setup utilise
+la même transaction pour ses licences et son inscription de désinstallation.
+Les dépendances téléchargées et le cache de symboles sont conservés.
+
+Le retour arrière ne protège pas automatiquement d'une coupure de courant ou
+d'une terminaison forcée. S'il ne peut pas restaurer un fichier ou une valeur,
+il conserve les sauvegardes et `rollback.json` dans le dossier temporaire indiqué
+par l'erreur. Les tests d'échec sont décrits dans [TESTS.md](../TESTS.md).
+
 ## Installateur automatique
 
 - Source : `Installer/`, construction : `scripts/Build-Installer.ps1` après `Build.ps1`.

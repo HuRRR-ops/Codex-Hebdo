@@ -1,4 +1,4 @@
-param([string]$SevenZipPath = "$env:ProgramFiles\7-Zip")
+﻿param([string]$SevenZipPath = "$env:ProgramFiles\7-Zip")
 $ErrorActionPreference='Stop'
 $root=Split-Path $PSScriptRoot -Parent
 $dist=Join-Path $root 'dist'
@@ -11,6 +11,7 @@ foreach($file in @('codex-hebdo-taskbar.dll','codex-hebdo-taskbar.wh.cpp')) { Co
 foreach($file in @('Install.ps1','Uninstall.ps1','LICENSE','THIRD-PARTY-NOTICES.txt')) { Copy-Item -LiteralPath (Join-Path $root $file) -Destination $stage }
 Copy-Item -LiteralPath (Join-Path $root 'Installer\Bootstrap.ps1') -Destination $stage
 Copy-Item -LiteralPath (Join-Path $root 'scripts\Prepare-Symbols.ps1') -Destination (Join-Path $stage 'scripts')
+Copy-Item -LiteralPath (Join-Path $root 'scripts\Install-Transaction.ps1') -Destination (Join-Path $stage 'scripts')
 Get-ChildItem -LiteralPath (Join-Path $root 'licenses') -File | Copy-Item -Destination (Join-Path $stage 'licenses')
 $sevenArchive=Join-Path $dist '7z2604-x64.exe'
 $sevenSource=Join-Path $dist '7z2604-src.tar.xz'

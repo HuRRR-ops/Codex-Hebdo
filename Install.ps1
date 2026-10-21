@@ -1,6 +1,7 @@
-param([string]$WindhawkPath, [string]$CodexPath, [switch]$NoStart)
+﻿param([string]$WindhawkPath, [string]$CodexPath, [switch]$NoStart, [switch]$RegisterUninstall)
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
+. (Join-Path $PSScriptRoot 'scripts\Install-Transaction.ps1')
 $destination = Join-Path $env:LOCALAPPDATA 'CodexHebdo'
 $source = Join-Path $PSScriptRoot 'dist\Companion'
 if (!(Test-Path (Join-Path $source 'CodexHebdo.exe'))) { throw 'Exécuter Build.ps1 avant installation.' }
@@ -16,27 +17,33 @@ if (!$WindhawkPath -or !(Test-Path (Join-Path $WindhawkPath 'windhawk.exe'))) {
     throw 'Windhawk absent. Installer https://windhawk.net puis relancer, ou fournir -WindhawkPath.'
 }
 $WindhawkPath = (Resolve-Path -LiteralPath $WindhawkPath).Path
-if (Test-Path (Join-Path $WindhawkPath 'windhawk.ini')) {
-    & (Join-Path $PSScriptRoot 'scripts\Prepare-Symbols.ps1') -WindhawkPath $WindhawkPath
-}
 $oldExe = Join-Path $destination 'CodexHebdo.exe'
-$run = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run'
+$run = 'Software\Microsoft\Windows\CurrentVersion\Run'
 $enableStartup = !(Test-Path (Join-Path $destination 'preferences.json')) -or
-    ($null -ne (Get-ItemProperty -Path $run -Name CodexHebdo -ErrorAction SilentlyContinue))
-if (Test-Path -LiteralPath $oldExe) {
-    Start-Process -FilePath $oldExe -ArgumentList '--stop' -WindowStyle Hidden -Wait
-    $running = Get-Process CodexHebdo -ErrorAction SilentlyContinue | Where-Object Path -eq $oldExe
-    if ($running) { $running | Wait-Process -Timeout 15 -ErrorAction Stop }
+    ($null -ne (Get-ItemProperty -Path "HKCU:\$run" -Name CodexHebdo -ErrorAction SilentlyContinue))
+$files = New-Object 'System.Collections.Generic.List[object]'
+function Add-File([string]$From, [string]$To) {
+    if (!(Test-Path -LiteralPath $From -PathType Leaf)) { throw "Installation file missing: $From" }
+    $files.Add(@{ Source=$From; Target=$To })
 }
-New-Item -ItemType Directory -Force $destination | Out-Null
-Copy-Item -Path (Join-Path $source '*') -Destination $destination -Force -Recurse
-Set-Content -LiteralPath (Join-Path $destination 'codex-path.txt') -Value $codex -Encoding utf8
-Copy-Item (Join-Path $PSScriptRoot 'Uninstall.ps1') $destination -Force
-Copy-Item (Join-Path $PSScriptRoot 'dist\codex-hebdo-taskbar.wh.cpp') $destination -Force
+function Add-Text([string]$Text, [string]$To, [Text.Encoding]$Encoding = [Text.UTF8Encoding]::new($false)) {
+    $files.Add(@{ Bytes=[byte[]]($Encoding.GetPreamble()+$Encoding.GetBytes($Text)); Target=$To })
+}
+foreach ($file in Get-ChildItem -LiteralPath $source -Recurse -File) {
+    # Build output must never overwrite user preferences or local configuration.
+    if ($file.Name -in @('preferences.json','preferences.json.tmp','codex-path.txt','installation.json','probe.json')) { continue }
+    Add-File $file.FullName (Join-Path $destination $file.FullName.Substring($source.Length+1))
+}
+Add-Text $codex (Join-Path $destination 'codex-path.txt')
+foreach ($name in @('Uninstall.ps1','LICENSE','THIRD-PARTY-NOTICES.txt')) { Add-File (Join-Path $PSScriptRoot $name) (Join-Path $destination $name) }
+foreach ($file in Get-ChildItem -LiteralPath (Join-Path $PSScriptRoot 'licenses') -Recurse -File) {
+    Add-File $file.FullName (Join-Path $destination $file.FullName.Substring($PSScriptRoot.Length+1))
+}
+Add-File (Join-Path $PSScriptRoot 'dist\codex-hebdo-taskbar.wh.cpp') (Join-Path $destination 'codex-hebdo-taskbar.wh.cpp')
 $portable = $false
 $iniPath = Join-Path $WindhawkPath 'windhawk.ini'
 if (Test-Path -LiteralPath $iniPath) {
-    $ini = Get-Content -LiteralPath $iniPath -Raw
+    $ini = [IO.File]::ReadAllText($iniPath)
     $portable = $ini -match '(?m)^Portable=1\s*$'
 }
 $nativeInstalled = $false
@@ -47,15 +54,14 @@ if ($portable) {
     $mods = Join-Path $appData 'Engine\Mods'
     $dll = Join-Path $PSScriptRoot 'dist\codex-hebdo-taskbar.dll'
     if (!(Test-Path $dll)) { throw 'Compiler le module natif avec Build.ps1 -WindhawkPath.' }
-    New-Item -ItemType Directory -Force (Join-Path $mods '64') | Out-Null
     # Unique DLL name permits an in-place update without overwriting a loaded library.
     $dllName = 'codex-hebdo-taskbar_' + [Guid]::NewGuid().ToString('N') + '.dll'
-    Copy-Item -LiteralPath $dll -Destination (Join-Path $mods "64\$dllName")
+    Add-File $dll (Join-Path $mods "64\$dllName")
     foreach ($pair in @(@('libc++.dll','libc++.whl'),@('libunwind.dll','libunwind.whl'),@('windhawk-mod-shim.dll','windhawk-mod-shim.dll'))) {
         $target = Join-Path $mods "64\$($pair[1])"
-        if (!(Test-Path -LiteralPath $target)) { Copy-Item -LiteralPath (Join-Path $WindhawkPath "Compiler\x86_64-w64-mingw32\bin\$($pair[0])") -Destination $target }
+        if (!(Test-Path -LiteralPath $target)) { Add-File (Join-Path $WindhawkPath "Compiler\x86_64-w64-mingw32\bin\$($pair[0])") $target }
     }
-    @"
+    $modText = @"
 [Mod]
 LibraryFileName=$dllName
 Disabled=0
@@ -64,24 +70,41 @@ DebugLoggingEnabled=0
 Include=explorer.exe
 Architecture=amd64
 Version=1.2.3
-"@ | Set-Content -LiteralPath (Join-Path $mods 'codex-hebdo-taskbar.ini') -Encoding Unicode
-    New-Item -ItemType Directory -Force (Join-Path $appData 'ModsSource') | Out-Null
-    Copy-Item (Join-Path $PSScriptRoot 'dist\codex-hebdo-taskbar.wh.cpp') (Join-Path $appData 'ModsSource\codex-hebdo-taskbar.wh.cpp') -Force
+"@
+    Add-File (Join-Path $PSScriptRoot 'dist\codex-hebdo-taskbar.wh.cpp') (Join-Path $appData 'ModsSource\codex-hebdo-taskbar.wh.cpp')
     $nativeInstalled = $true
 }
-@{ WindhawkPath=$WindhawkPath; Portable=$portable; NativeInstalled=$nativeInstalled } | ConvertTo-Json |
-    Set-Content -LiteralPath (Join-Path $destination 'installation.json') -Encoding utf8
-$run = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run'
-New-Item -Path $run -Force | Out-Null
+Add-Text (@{ WindhawkPath=$WindhawkPath; Portable=$portable; NativeInstalled=$nativeInstalled } | ConvertTo-Json) (Join-Path $destination 'installation.json')
+# Activate only after every application/support file has been staged and written.
+if ($portable) { Add-Text $modText (Join-Path $mods 'codex-hebdo-taskbar.ini') ([Text.Encoding]::Unicode) }
+foreach ($entry in $files) { Assert-InstallPath $entry.Target }
+if ($portable) { & (Join-Path $PSScriptRoot 'scripts\Prepare-Symbols.ps1') -WindhawkPath $WindhawkPath }
+$registry = New-Object 'System.Collections.Generic.List[object]'
 if ($enableStartup) {
-New-ItemProperty -Path $run -Name 'CodexHebdo' -Value ('"' + $oldExe + '"') -PropertyType String -Force | Out-Null
-if ($portable) {
-    New-ItemProperty -Path $run -Name 'CodexHebdo.Windhawk' -Value ('"' + (Join-Path $WindhawkPath 'windhawk.exe') + '" -tray-only') -PropertyType String -Force | Out-Null
+    $registry.Add(@{ Key=$run; Name='CodexHebdo'; Value=('"'+$oldExe+'"') })
+    if ($portable) { $registry.Add(@{ Key=$run; Name='CodexHebdo.Windhawk'; Value=('"'+(Join-Path $WindhawkPath 'windhawk.exe')+'" -tray-only') }) }
 }
+if ($RegisterUninstall) {
+    $shell = Join-Path $env:WINDIR 'System32\WindowsPowerShell\v1.0\powershell.exe'
+    $values = @{ DisplayName='Codex Hebdo'; DisplayVersion='1.2.3'; Publisher='Codex Hebdo'; InstallLocation=$destination;
+        DisplayIcon=$oldExe; UninstallString=('"'+$shell+'" -NoProfile -ExecutionPolicy Bypass -File "'+(Join-Path $destination 'Uninstall.ps1')+'"') }
+    foreach ($name in $values.Keys) { $registry.Add(@{ Key='Software\Microsoft\Windows\CurrentVersion\Uninstall\CodexHebdo'; Name=$name; Value=$values[$name] }) }
 }
-if (!$NoStart) {
-    Start-Process -FilePath $oldExe -WindowStyle Hidden
-    Start-Process -FilePath (Join-Path $WindhawkPath 'windhawk.exe') -ArgumentList '-tray-only' -WindowStyle Hidden
+$wasRunning = @(Get-Process CodexHebdo -ErrorAction SilentlyContinue | Where-Object Path -eq $oldExe).Count -gt 0
+$stopCompanion = {
+    if (Test-Path -LiteralPath $oldExe) {
+        Start-Process -FilePath $oldExe -ArgumentList '--stop' -WindowStyle Hidden -Wait
+        $running = Get-Process CodexHebdo -ErrorAction SilentlyContinue | Where-Object Path -eq $oldExe
+        if ($running) { $running | Wait-Process -Timeout 15 -ErrorAction Stop }
+    }
+}
+Invoke-InstallTransaction -Files $files.ToArray() -RegistryValues $registry.ToArray() -Stop $stopCompanion -Start {
+    if (!$NoStart) {
+        Start-Process -FilePath $oldExe -WindowStyle Hidden
+        Start-Process -FilePath (Join-Path $WindhawkPath 'windhawk.exe') -ArgumentList '-tray-only' -WindowStyle Hidden
+    }
+} -RestartPrevious {
+    if ($wasRunning) { Start-Process -FilePath $oldExe -WindowStyle Hidden }
 }
 if ($nativeInstalled) { Write-Host "Installé : $destination. Démarrage automatique configuré pour cet utilisateur." }
 else {
