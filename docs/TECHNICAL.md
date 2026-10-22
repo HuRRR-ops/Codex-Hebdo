@@ -106,11 +106,25 @@ pour les jeux, quel que soit leur magasin ou dossier.
 La configuration est créée uniquement pour le portable 1.7.3 préparé par Codex Hebdo,
 ou une ancienne installation identifiée par `installation.json`, sans autre mod
 (même désactivé) et sans fichier de réglages moteur préexistant. Les installations
-partagées ou personnalisées restent intactes et affichent un avertissement.
+partagées ou personnalisées restent intactes : l'installation est interrompue
+avant toute modification lorsque la restriction ne peut pas être confirmée.
+L'erreur indique la cause (autres mods, réglages existants, disposition inconnue).
+Une autre instance Windhawk active, ou dont le chemin ne peut pas être lu,
+bloque également l'installation par défaut. Cela ne surveille pas les instances
+qui pourraient être lancées ultérieurement.
+
+Pour réutiliser volontairement une configuration partagée, l'installation manuelle
+accepte `-AllowSharedWindhawk`. Ce choix préserve les réglages et affiche un
+avertissement ; il n'offre pas la garantie de restriction à Explorer. L'assistant
+n'active jamais cette dérogation automatiquement.
 Les nouveaux portables portent le marqueur `codex-hebdo-managed.txt`.
 
 Le fichier participe à la transaction et est retiré en cas d'échec. Si Windhawk
-était actif, l'installation demande son redémarrage via `-restart -tray-only`.
+était actif, l'installation demande son redémarrage via `-restart -tray-only`,
+même si le fichier était déjà présent (notamment après une installation `-NoStart`).
+Avant le démarrage, le fichier est relu et sa conformité vérifiée ; une erreur
+déclenche le retour arrière. Cette vérification porte sur la configuration, pas
+sur une mesure des DLL effectivement chargées dans chaque processus.
 Avec `-NoStart`, redémarrer Windhawk manuellement avant de relancer les jeux.
 Relancer les jeux déjà ouverts ; une modification de réglage ne garantit pas le
 déchargement du moteur de processus existants. Les réglages restent dans Windhawk

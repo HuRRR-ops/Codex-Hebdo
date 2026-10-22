@@ -121,6 +121,13 @@ Indiquez le dossier de votre installation Windhawk :
 .\Install.ps1 -WindhawkPath "C:\chemin\vers\Windhawk"
 ```
 
+**Sources actuelles, non encore publiées en release :** par défaut, l'installation exige une configuration Windhawk dédiée dont la
+restriction à Explorer peut être vérifiée. Les autres mods, les réglages moteur
+personnalisés non reconnus ou une autre instance Windhawk active interrompent
+l'installation avec une explication. Pour conserver volontairement une installation
+partagée, utilisez `Install.ps1 -AllowSharedWindhawk` : la restriction globale
+à Explorer n'est alors pas garantie.
+
 Avec **Windhawk portable**, le script configure le mod automatiquement. Avec une installation **standard**, suivez les instructions affichées pour importer et compiler le mod dans Windhawk.
 
 Une fois installé, **double-cliquez sur le widget** pour ouvrir les options. Vos préférences sont conservées lors des mises à jour.

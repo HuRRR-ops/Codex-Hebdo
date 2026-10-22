@@ -114,7 +114,11 @@ de structures privées Windows et vise la barre horizontale principale de Window
 `Tests/WindhawkIsolation.Tests.ps1` : 9 contrôles couvrent provenance, migration,
 encodage UTF-16, ciblage absolu d'Explorer, idempotence et préservation des réglages
 personnalisés et des autres mods (y compris désactivés).
-`Tests/InstallEntry.Tests.ps1` : 9 contrôles, dont retrait des réglages au rollback,
+`Tests/InstallEntry.Tests.ps1` : 13 contrôles, dont retrait des réglages au rollback,
 installation effective du fichier et demande de redémarrage du moteur actif.
 Ces tests utilisent des dossiers temporaires et des processus simulés. Ils ne
 prouvent ni la compatibilité d'un jeu particulier ni le rendu du widget en session.
+
+Le renforcement de l'isolation couvre aussi le rechargement d'un réglage déjà
+présent, le refus avant modification d'une autre instance active ou d'autres mods,
+et la conservation des réglages lors d'une dérogation explicite `-AllowSharedWindhawk`.

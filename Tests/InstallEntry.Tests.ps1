@@ -21,8 +21,8 @@ $codex=Join-Path $root 'codex.exe';[IO.File]::WriteAllText($codex,'fixture')
 New-Item -ItemType Directory -Force "$windhawk\Engine\1.7.3" | Out-Null
 [IO.File]::WriteAllText("$windhawk\Engine\1.7.3\engine.ini","[Storage]`r`nPortable=1`r`nAppDataPath=..\..\AppData\Engine")
 [IO.File]::WriteAllText("$windhawk\codex-hebdo-managed.txt",'Created by Codex Hebdo')
-$state=@{Launches=0;Fail=$true;WindhawkRunning=$false;LastArguments=$null}
-function Get-Process { param($Name,$ErrorAction) if ($Name -eq 'CodexHebdo') { return [pscustomobject]@{Path="$app\CodexHebdo.exe"} }; if ($Name -eq 'windhawk' -and $state.WindhawkRunning) { return [pscustomobject]@{Path="$windhawk\windhawk.exe"} } }
+$state=@{Launches=0;Fail=$true;WindhawkRunning=$false;LastArguments=$null;OtherWindhawk=$false}
+function Get-Process { param($Name,$ErrorAction) if ($Name -eq 'CodexHebdo') { return [pscustomobject]@{Path="$app\CodexHebdo.exe"} }; if ($Name -eq 'windhawk' -and $state.OtherWindhawk) { return [pscustomobject]@{Path="$root\another\windhawk.exe"} }; if ($Name -eq 'windhawk' -and $state.WindhawkRunning) { return [pscustomobject]@{Path="$windhawk\windhawk.exe"} } }
 function Wait-Process { param([Parameter(ValueFromPipeline=$true)]$InputObject,$Timeout) }
 function Get-ItemProperty { param($Path,$Name,$ErrorAction) return $null } # Autostart remains disabled.
 function Start-Process { param($FilePath,$ArgumentList,$WindowStyle,[switch]$Wait)
@@ -57,7 +57,23 @@ try {
     $state.WindhawkRunning=$true
     & "$payload\Install.ps1" -WindhawkPath $windhawk -CodexPath $codex
     if ($state.LastArguments -ne '-restart -tray-only') { throw 'Running dedicated Windhawk must restart to load isolation settings.' }
-    Write-Output '9 installer entry-point checks passed.'
+    $state.LastArguments=$null
+    & "$payload\Install.ps1" -WindhawkPath $windhawk -CodexPath $codex
+    if ($state.LastArguments -ne '-restart -tray-only') { throw 'An existing settings file must not skip reloading the running engine.' }
+    $state.OtherWindhawk=$true
+    $launches=$state.Launches
+    $failed=$false
+    try { & "$payload\Install.ps1" -WindhawkPath $windhawk -CodexPath $codex } catch { $failed=$_.Exception.Message -like '*autre instance Windhawk*' }
+    if (!$failed -or $state.Launches -ne $launches) { throw 'Another engine must block installation before stopping processes.' }
+    $state.OtherWindhawk=$false
+    [IO.File]::WriteAllText("$windhawk\AppData\Engine\Mods\other.ini","[Mod]`nDisabled=1")
+    $failed=$false
+    try { & "$payload\Install.ps1" -WindhawkPath $windhawk -CodexPath $codex } catch { $failed=$_.Exception.Message -like '*Autres mods Windhawk presents*' }
+    if (!$failed -or $state.Launches -ne $launches) { throw 'Shared configuration must fail before modifying the installation.' }
+    $settingsBefore=[IO.File]::ReadAllText("$windhawk\AppData\Engine\settings.ini")
+    & "$payload\Install.ps1" -WindhawkPath $windhawk -CodexPath $codex -AllowSharedWindhawk -NoStart
+    if ([IO.File]::ReadAllText("$windhawk\AppData\Engine\settings.ini") -cne $settingsBefore) { throw 'Explicit shared mode must preserve engine settings.' }
+    Write-Output '13 installer entry-point checks passed.'
 } finally {
     $env:LOCALAPPDATA=$previousLocal
     $resolved=[IO.Path]::GetFullPath($root)

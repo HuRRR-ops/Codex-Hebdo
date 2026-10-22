@@ -1,4 +1,4 @@
-﻿param([string]$WindhawkPath, [string]$CodexPath, [switch]$NoStart, [switch]$RegisterUninstall)
+﻿param([string]$WindhawkPath, [string]$CodexPath, [switch]$NoStart, [switch]$RegisterUninstall, [switch]$AllowSharedWindhawk)
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 . (Join-Path $PSScriptRoot 'scripts\Install-Transaction.ps1')
@@ -48,7 +48,7 @@ if (Test-Path -LiteralPath $iniPath) {
     $portable = $ini -match '(?m)^Portable=1\s*$'
 }
 $nativeInstalled = $false
-$isolation = @{ File=$null; Status='preserved' }
+$isolation = @{ File=$null; Status='preserved'; Reason='Installation Windhawk standard : restriction non geree automatiquement.' }
 if ($portable) {
     if ($ini -notmatch '(?m)^AppDataPath=(.+)$') { throw 'AppDataPath Windhawk introuvable.' }
     $appData = [Environment]::ExpandEnvironmentVariables($Matches[1].Trim())
@@ -78,6 +78,14 @@ Version=1.2.3
     Add-File (Join-Path $PSScriptRoot 'dist\codex-hebdo-taskbar.wh.cpp') (Join-Path $appData 'ModsSource\codex-hebdo-taskbar.wh.cpp')
     $nativeInstalled = $true
 }
+# Fail before stopping processes or writing any files if isolation cannot be ensured.
+if ($isolation.Status -eq 'preserved' -and !$AllowSharedWindhawk) {
+    throw ("Installation interrompue : " + $isolation.Reason + " Utilisez une installation Windhawk dediee a Codex Hebdo. Pour conserver explicitement une configuration partagee sans garantie d isolation, relancez Install.ps1 avec -AllowSharedWindhawk.")
+}
+$otherWindhawk = @(Get-Process windhawk -ErrorAction SilentlyContinue | Where-Object { !$_.Path -or $_.Path -ne (Join-Path $WindhawkPath 'windhawk.exe') })
+if ($otherWindhawk.Count -gt 0 -and !$AllowSharedWindhawk) {
+    throw 'Une autre instance Windhawk est active (ou son chemin est inaccessible). Fermez-la avant installation : ses injections ne sont pas controlees par Codex Hebdo.'
+}
 Add-Text (@{ WindhawkPath=$WindhawkPath; Portable=$portable; NativeInstalled=$nativeInstalled } | ConvertTo-Json) (Join-Path $destination 'installation.json')
 # Activate only after every application/support file has been staged and written.
 if ($portable) { Add-Text $modText (Join-Path $mods 'codex-hebdo-taskbar.ini') ([Text.Encoding]::Unicode) }
@@ -104,9 +112,13 @@ $stopCompanion = {
     }
 }
 Invoke-InstallTransaction -Files $files.ToArray() -RegistryValues $registry.ToArray() -Stop $stopCompanion -Start {
+    if ($isolation.Status -ne 'preserved') {
+        $verification = Get-WindhawkIsolationPlan -WindhawkPath $WindhawkPath -AppDataPath $appData -InstallationFile (Join-Path $destination 'installation.json')
+        if ($verification.Status -ne 'already-isolated') { throw 'Verification de la restriction Windhawk echouee. Installation annulee.' }
+    }
     if (!$NoStart) {
         Start-Process -FilePath $oldExe -WindowStyle Hidden
-        $windhawkArguments = if ($isolation.File -and $windhawkWasRunning) { '-restart -tray-only' } else { '-tray-only' }
+        $windhawkArguments = if ($isolation.Status -ne 'preserved' -and $windhawkWasRunning) { '-restart -tray-only' } else { '-tray-only' }
         Start-Process -FilePath (Join-Path $WindhawkPath 'windhawk.exe') -ArgumentList $windhawkArguments -WindowStyle Hidden
     }
 } -RestartPrevious {
@@ -116,8 +128,8 @@ Invoke-InstallTransaction -Files $files.ToArray() -RegistryValues $registry.ToAr
     if ($wasRunning) { Start-Process -FilePath $oldExe -WindowStyle Hidden }
 }
 if ($isolation.Status -eq 'preserved') { Write-Warning 'Configuration Windhawk partagee/personnalisee conservee : restriction globale a Explorer non appliquee.' }
-elseif ($NoStart -and $isolation.File) { Write-Warning 'Restriction a Explorer enregistree. Redemarrer Windhawk pour l appliquer aux prochains lancements de jeux.' }
-else { Write-Host 'Windhawk limite a Explorer. Relancer les jeux deja ouverts pour beneficier de cette restriction.' }
+elseif ($NoStart) { Write-Warning 'Restriction a Explorer enregistree. Redemarrer Windhawk pour l appliquer aux prochains lancements de jeux.' }
+else { Write-Host 'Configuration Windhawk verifiee : restriction a Explorer. Relancer les jeux deja ouverts pour beneficier de cette restriction.' }
 if ($nativeInstalled) { Write-Host "Installé : $destination. Démarrage automatique configuré pour cet utilisateur." }
 else {
     Write-Host "Compagnon installé. Dans Windhawk : Créer un nouveau mod, remplacer le code par $destination\codex-hebdo-taskbar.wh.cpp, puis Compiler (F7) et activer."
